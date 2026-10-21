@@ -216,6 +216,26 @@ label.f textarea{min-height:76px;resize:vertical;line-height:1.45}
 @media (min-width:821px){.top .wrap{flex-wrap:nowrap}.top .who{flex:0 1 auto}.top .btn,.top .role,.top .langsw{flex:none}}
 .brand .subtitle{font-size:12.5px;line-height:1.35}
 .card{text-align:center}
+@media (max-width:1480px){.top .who-l,.top .who-e{display:none}.top .who-n{max-width:150px}}
+.top .who{flex:none!important}.top .brand{flex:1 1 auto}
+.afil{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.afil select,.afil input{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 10px;min-height:38px;flex:1 1 140px}
+.alist{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.alist li{padding:10px 12px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:auto 1fr;gap:2px 10px}
+.alist li:last-child{border-bottom:0}
+.alist .at{font-size:12px;color:var(--muted);white-space:nowrap;grid-row:span 2;padding-top:2px;min-width:92px}
+.alist .who2{font-size:13.5px}
+.alist .who2 b{font-weight:650}
+.alist .who2 span{color:var(--muted);font-size:12.5px}
+.alist .what{font-size:13.5px}
+.alist .det{grid-column:2;font-size:12.5px;color:var(--muted)}
+.abadge{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:999px;margin-right:6px;vertical-align:1px}
+.abadge.login{background:#E3ECFA;color:#1E4E9C}
+.abadge.view{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.abadge.update{background:var(--now-soft);color:var(--now-ink)}
+.abadge.denied{background:var(--danger-soft);color:var(--danger)}
+:root[data-theme="dark"] .abadge.login{background:#1B2B47;color:#9DBCE4}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .abadge.login{background:#1B2B47;color:#9DBCE4}}
 .langsw{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;flex:none;background:var(--surface)}
 .langsw button{border:0;background:none;padding:7px 10px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);min-width:40px}
 .langsw button+button{border-left:1px solid var(--line)}
@@ -237,6 +257,7 @@ label.f textarea{min-height:76px;resize:vertical;line-height:1.45}
 .ihead h3{margin:0;font-size:15px;flex:1}
 .isearch{width:100%;margin:0 0 12px;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:9px 12px;min-height:40px}
 .ifile{font-size:13px;color:var(--muted);word-break:break-all}
+.srctag{display:inline-block;font-size:11px;font-weight:700;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:0 7px;margin-bottom:3px}
 .pdftag{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:800;padding:1px 5px;border-radius:4px;background:#C62828;color:#fff;vertical-align:1px}
 .card .logo{height:76px;margin:0 auto 8px}
 .card .ministry{margin:0 0 18px;font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
@@ -343,6 +364,9 @@ label.f textarea{min-height:76px;resize:vertical;line-height:1.45}
     <button class="btn" id="usersBtn" hidden>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.6.8 2.6 2.5 3 5.2"/></svg><span data-i18n="Pengguna">Pengguna</span>
     </button>
+    <button class="btn" id="auditBtn" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg><span data-i18n="Audit">Audit</span>
+    </button>
     <div class="langsw" role="group" aria-label="Bahasa / Language"><button data-lang="ms" title="Bahasa Melayu">BM</button><button data-lang="en" title="English">EN</button></div>
     <button class="btn" id="logoutBtn" data-i18n="Log keluar">Log keluar</button>
   </div>
@@ -434,7 +458,7 @@ const OWNER_EMAIL = "za.system.147@gmail.com";
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, deleteField, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, deleteDoc, deleteField, onSnapshot, writeBatch, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const STAGES=[
   {k:'IKLAN',l:'Iklan',fields:[['tarikhIklan','Tarikh iklan'],['tarikhTutup','Tarikh tutup iklan']]},
@@ -517,6 +541,15 @@ const EN={
 'Domain laman ini belum dibenarkan dalam Firebase (Authentication > Settings > Authorized domains).':'This site’s domain is not yet allowed in Firebase (Authentication > Settings > Authorized domains).',
 'Log masuk tidak berjaya. Cuba lagi.':'Sign-in failed. Please try again.',
 'Akses anda telah ditarik balik. Log keluar dan hubungi admin.':'Your access has been removed. Sign out and contact the admin.','Sambungan ke data terputus. Muat semula halaman.':'Connection to the data was lost. Reload the page.',
+'Audit':'Audit','Dari rekod jawatan':'From a post record','Lihat jawatan':'View post','Log Audit':'Audit Log',
+'Rekod log masuk, fail yang dilihat dan kemas kini oleh semua pengguna. Hanya admin boleh melihat log ini.':'Sign-ins, files viewed and updates by all users. Only admins can see this log.',
+'Log masuk':'Sign in','Cubaan log masuk (tidak berdaftar)':'Sign-in attempt (not registered)','Lihat butiran jawatan':'Viewed post details','Buka PDF':'Opened PDF','Muat turun PDF':'Downloaded PDF','Muat turun Excel':'Downloaded Excel',
+'Kemas kini jawatan':'Updated post','Muat naik PDF jawatan':'Uploaded post PDF','Buang PDF jawatan':'Removed post PDF','Muat naik iklan':'Uploaded advert','Buang iklan':'Removed advert','Tukar peranan':'Changed role','Import data':'Imported data',
+'Medan diubah':'Fields changed','Fail':'File','{n} rekod':v=>v.n==1?'1 record':'{n} records','menggantikan fail lama':'replaced the old file',
+'Jenis aktiviti':'Activity type','Semua aktiviti':'All activity','Log masuk / keluar':'Sign in / out','Lihat & muat turun':'Views & downloads','Kemas kini':'Updates','Semua pengguna':'All users','Cari':'Search',
+'Muat turun CSV':'Download CSV','{a} daripada {b} rekod terkini':'{a} of {b} latest records','Tiada rekod.':'No records.',
+'Menunjukkan 400 rekod pertama. Gunakan tapisan atau muat turun CSV untuk semua.':'Showing the first 400 records. Use the filters, or download the CSV for all of them.',
+'Masa':'Time','Nama':'Name','Emel':'Email','Aktiviti':'Activity','Perkara':'Item','Butiran':'Details',
 'Masukkan butiran Firebase dalam fail <code>index.html</code> (bahagian <code>FIREBASE_CONFIG</code> dan <code>OWNER_EMAIL</code>). Rujuk PANDUAN.md.':'Enter the Firebase details in <code>index.html</code> (the <code>FIREBASE_CONFIG</code> and <code>OWNER_EMAIL</code> section). See PANDUAN.md.'
 };
 let LANG=(()=>{try{return localStorage.getItem('pjk-lang')==='en'?'en':'ms'}catch(e){return 'ms'}})();
@@ -541,10 +574,26 @@ let lastLoginErr='';
 document.querySelectorAll('.langsw button').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
 applyStatic();
 
+/* ---------- audit log ---------- */
+const AUDIT={
+  login:['Log masuk','login'], login_denied:['Cubaan log masuk (tidak berdaftar)','denied'], logout:['Log keluar','login'],
+  view_jawatan:['Lihat butiran jawatan','view'], open_pdf:['Buka PDF','view'], download_pdf:['Muat turun PDF','view'], export_excel:['Muat turun Excel','view'],
+  add_jawatan:['Tambah jawatan','update'], edit_jawatan:['Kemas kini jawatan','update'], delete_jawatan:['Padam jawatan','update'],
+  upload_pdf:['Muat naik PDF jawatan','update'], remove_pdf:['Buang PDF jawatan','update'],
+  upload_iklan:['Muat naik iklan','update'], remove_iklan:['Buang iklan','update'],
+  add_user:['Tambah pengguna','update'], change_role:['Tukar peranan','update'], remove_user:['Buang pengguna','update'], import:['Import data','update']
+};
+function audit(action,target,extra){
+  if(!fdb||!me)return Promise.resolve();
+  return addDoc(collection(fdb,'audit'),{at:serverTimestamp(),email:(me.email||'').toLowerCase(),name:me.displayName||'',action,target:String(target||'').slice(0,300),...(extra||{})}).catch(()=>{});
+}
+const jobName=r=>r?[r.jawatan,r.jabatan].filter(Boolean).join(', '):'';
+
 
 let fdb=null,auth=null,me=null,isAdmin=false;
 let rows=[],users=[],iklans=[],loaded=false,iklanLoaded=false;
-let unsubRows=null,unsubUsers=null,unsubIklan=null;
+let unsubRows=null,unsubUsers=null,unsubIklan=null,unsubAudit=null;
+let audits=[],auditLoaded=false;const AF={cat:'',who:'',q:''};
 const F={stage:'',q:'',kod:'',tahun:'',sort:'bil'};
 let openId=null,mode='view';
 
@@ -604,17 +653,18 @@ function renderKod(){
 function renderRole(){
   $('role').className='role'+(isAdmin?' edit':'');
   $('role').querySelector('span').textContent=isAdmin?T('Admin'):T('Paparan sahaja');
-  $('addBtn').hidden=!isAdmin;$('usersBtn').hidden=!isAdmin;
+  $('addBtn').hidden=!isAdmin;$('usersBtn').hidden=!isAdmin;$('auditBtn').hidden=!isAdmin;
 }
-function renderAll(){renderSummary();renderPipe();renderKod();renderRows();renderRole();if(openId&&mode==='view')renderDrawer();if(mode==='users')renderUsers();}
+function renderAll(){renderSummary();renderPipe();renderKod();renderRows();renderRole();if(openId&&mode==='view')renderDrawer();if(mode==='users')renderUsers();if(mode==='iklan')renderIklanList();}
 
 /* ---------- drawer ---------- */
-function openDrawer(id,m='view'){openId=id;mode=m;renderDrawer();$('drawer').classList.add('open');$('drawer').setAttribute('aria-hidden','false');$('scrim').classList.add('open');setTimeout(()=>$('close').focus(),50);}
+function openDrawer(id,m='view'){openId=id;mode=m;if(m==='view'&&id){const r=rows.find(x=>x.id===id);if(r)audit('view_jawatan',jobName(r),{ref:r.rujukanIklan||''});}renderDrawer();$('drawer').classList.add('open');$('drawer').setAttribute('aria-hidden','false');$('scrim').classList.add('open');setTimeout(()=>$('close').focus(),50);}
 function closeDrawer(){const was=openId;openId=null;mode='view';$('drawer').classList.remove('open');$('drawer').setAttribute('aria-hidden','true');$('scrim').classList.remove('open');const tr=was&&document.querySelector(`tr[data-id="${CSS.escape(was)}"]`);if(tr)tr.focus();}
 
 function renderDrawer(){
   if(mode==='users')return renderUsers();
   if(mode==='iklan')return renderIklan();
+  if(mode==='audit')return renderAudit();
   if(mode==='new')return renderForm(null);
   const r=rows.find(x=>x.id===openId);
   if(!r){closeDrawer();return}
@@ -636,7 +686,7 @@ function renderDrawer(){
   wirePdf(r);
   $('dFoot').hidden=!isAdmin;
   $('dFoot').innerHTML=isAdmin?`<button class="btn primary" id="editBtn">${T('Edit maklumat')}</button><span class="spacer"></span><button class="btn danger" id="delBtn">${T('Padam')}</button>`:'';
-  if(isAdmin){$('editBtn').onclick=()=>{mode='edit';renderDrawer()};$('delBtn').onclick=()=>ask(T('Padam jawatan ini?'),T('“{n}” akan dibuang untuk semua pengguna.',{n:r.jawatan+(r.jabatan?', '+r.jabatan:'')}),async()=>{try{await deleteDoc(doc(fdb,'jawatan',r.id));if(r.iklanPdf&&r.iklanPdf.id)delChunks(r.iklanPdf).catch(()=>{});closeDrawer();toast(T('Jawatan dipadam.'))}catch(e){toast(errMsg(e))}});}
+  if(isAdmin){$('editBtn').onclick=()=>{mode='edit';renderDrawer()};$('delBtn').onclick=()=>ask(T('Padam jawatan ini?'),T('“{n}” akan dibuang untuk semua pengguna.',{n:r.jawatan+(r.jabatan?', '+r.jabatan:'')}),async()=>{try{await deleteDoc(doc(fdb,'jawatan',r.id));audit('delete_jawatan',jobName(r));if(r.iklanPdf&&r.iklanPdf.id)delChunks(r.iklanPdf).catch(()=>{});closeDrawer();toast(T('Jawatan dipadam.'))}catch(e){toast(errMsg(e))}});}
 }
 
 const FORM=[
@@ -673,7 +723,9 @@ async function save(r){
   data.updatedAt=new Date().toISOString();
   data.updatedBy=me.displayName||me.email;
   const btn=$('saveBtn');btn.disabled=true;btn.textContent=T('Menyimpan…');
-  try{await setDoc(doc(fdb,'jawatan',id),data,{merge:true});toast(isNew?T('Jawatan ditambah.'):T('Perubahan disimpan.'));openId=id;mode='view';renderDrawer();}
+  const changed=isNew?[]:FORM.flatMap(g=>g.fields.map(f=>f[0])).filter(k=>String(r[k]??'')!==String(data[k]??''));
+  try{await setDoc(doc(fdb,'jawatan',id),data,{merge:true});
+    if(isNew)audit('add_jawatan',jobName(data));else if(changed.length)audit('edit_jawatan',jobName(data),{fields:changed});toast(isNew?T('Jawatan ditambah.'):T('Perubahan disimpan.'));openId=id;mode='view';renderDrawer();}
   catch(e){btn.disabled=false;btn.textContent=isNew?T('Tambah jawatan'):T('Simpan perubahan');toast(errMsg(e));}
 }
 
@@ -698,7 +750,7 @@ function wirePdf(r){
   if($('pdfOpen'))$('pdfOpen').onclick=()=>openPdf(r,false);
   if($('pdfDl'))$('pdfDl').onclick=()=>openPdf(r,true);
   if($('pdfDel'))$('pdfDel').onclick=()=>ask(T('Buang fail iklan?'),T('“{n}” akan dibuang untuk semua pengguna.',{n:r.iklanPdf.name}),async()=>{
-    try{const old=r.iklanPdf;await setDoc(doc(fdb,'jawatan',r.id),{iklanPdf:deleteField()},{merge:true});delChunks(old).catch(()=>{});toast(T('Fail iklan dibuang.'));}catch(e){toast(errMsg(e))}
+    try{const old=r.iklanPdf;await setDoc(doc(fdb,'jawatan',r.id),{iklanPdf:deleteField()},{merge:true});audit('remove_pdf',jobName(r),{file:old&&old.name||''});delChunks(old).catch(()=>{});toast(T('Fail iklan dibuang.'));}catch(e){toast(errMsg(e))}
   });
 }
 async function delChunks(f){if(!f||!f.id)return;for(let i=0;i<(f.chunks||0);i++)await deleteDoc(doc(fdb,'pdf',f.id,'bahagian',pad(i)));}
@@ -714,6 +766,7 @@ async function uploadPdf(r,file){
     const meta=await writeChunks(file,pct=>setP(T('Memuat naik… {p}%',{p:pct})));
     const old=r.iklanPdf;
     await setDoc(doc(fdb,'jawatan',r.id),{iklanPdf:meta},{merge:true});
+    audit('upload_pdf',jobName(r),{file:file.name,replaced:!!(r.iklanPdf&&r.iklanPdf.id)});
     if(old&&old.id)delChunks(old).catch(()=>{});
     toast(T('Fail iklan dimuat naik.'));
   }catch(e){toast(errMsg(e));if(openId===r.id&&mode==='view')renderDrawer();}
@@ -730,9 +783,10 @@ async function writeChunks(file,onPct){
   return {id,name:file.name,size:file.size,chunks:n,uploadedAt:new Date().toISOString(),uploadedBy:me.displayName||me.email};
 }
 const pdfCache={};
-const openPdf=(r,download)=>openFile(r.iklanPdf,download);
-async function openFile(f,download){
+const openPdf=(r,download)=>openFile(r.iklanPdf,download,jobName(r));
+async function openFile(f,download,ctx){
   if(!f||!f.id)return;
+  audit(download?'download_pdf':'open_pdf',ctx||f.name,{file:f.name||''});
   const w=download?null:window.open('','_blank');
   try{
     let blob=pdfCache[f.id];
@@ -780,6 +834,7 @@ function renderIklan(){
     try{
       const meta=await writeChunks(file,pct=>{if($('ikUp'))$('ikUp').textContent=T('Memuat naik… {p}%',{p:pct})});
       await setDoc(doc(fdb,'iklan','i'+Date.now().toString(36)),{tajuk,rujukan:fm.rujukan.value.trim(),tarikh:fm.tarikh.value.trim(),fail:meta,createdAt:meta.uploadedAt});
+      audit('upload_iklan',tajuk,{file:file.name});
       fm.reset();toast(T('Iklan dimuat naik.'));
     }catch(err){toast(errMsg(err))}
     finally{uploading=false;if($('ikUp')){$('ikUp').disabled=false;$('ikUp').textContent=T('Muat naik');}}
@@ -789,26 +844,101 @@ function renderIklan(){
 function renderIklanList(){
   const box=$('ikList');if(!box)return;
   const q=iklanQ.trim().toLowerCase();
-  const list=iklans.filter(x=>!q||[x.tajuk,x.rujukan,x.tarikh,x.fail&&x.fail.name].join(' ').toLowerCase().includes(q))
+  const jobItems=rows.filter(r=>r.iklanPdf&&r.iklanPdf.id).map(r=>({id:'job:'+r.id,job:r,tajuk:r.jawatan||'',rujukan:[r.rujukanIklan,r.jenisIklan].filter(Boolean).join(', '),tarikh:r.jabatan||'',fail:r.iklanPdf,createdAt:r.iklanPdf.uploadedAt||''}));
+  const all=[...iklans,...jobItems];
+  const list=all.filter(x=>!q||[x.tajuk,x.rujukan,x.tarikh,x.fail&&x.fail.name].join(' ').toLowerCase().includes(q))
     .sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
-  $('ikCount').textContent=iklans.length?T('{a} daripada {b}',{a:list.length,b:iklans.length}):'';
+  $('ikCount').textContent=all.length?T('{a} daripada {b}',{a:list.length,b:all.length}):'';
   if(!iklanLoaded){box.innerHTML=`<p class="pdfnone">${T('Memuatkan…')}</p>`;return}
-  if(!iklans.length){box.innerHTML=`<p class="pdfnone">${isAdmin?T('Belum ada iklan. Muat naik fail PDF pertama di atas.'):T('Belum ada iklan dimuat naik.')}</p>`;return}
+  if(!all.length){box.innerHTML=`<p class="pdfnone">${isAdmin?T('Belum ada iklan. Muat naik fail PDF pertama di atas.'):T('Belum ada iklan dimuat naik.')}</p>`;return}
   if(!list.length){box.innerHTML=`<p class="pdfnone">${T('Tiada iklan sepadan dengan carian.')}</p>`;return}
   box.innerHTML=list.map(x=>{
     const f=x.fail||{};const when=f.uploadedAt?new Date(f.uploadedAt).toLocaleDateString(LOC(),{day:'2-digit',month:'short',year:'numeric'}):'';
     const sub=[x.rujukan,x.tarikh].filter(Boolean).join(', ');
-    return `<div class="iitem"><div class="pdfcard"><div class="pdfic" aria-hidden="true">PDF</div><div class="pdfmeta"><b>${esc(x.tajuk)}</b>${sub?`<span>${esc(sub)}</span><br>`:''}<span class="ifile">${esc(f.name||'')} (${fmtSize(f.size||0)})${when?', '+T('dimuat naik')+' '+esc(when):''}${f.uploadedBy?' '+T('oleh')+' '+esc(f.uploadedBy):''}</span></div></div>
-      <div class="pdfact"><button class="btn" data-ik-open="${esc(x.id)}">${T('Buka')}</button><button class="btn" data-ik-dl="${esc(x.id)}">${T('Muat turun')}</button>${isAdmin?`<button class="linkbtn" data-ik-del="${esc(x.id)}">${T('Buang')}</button>`:''}</div></div>`;
+    return `<div class="iitem"><div class="pdfcard"><div class="pdfic" aria-hidden="true">PDF</div><div class="pdfmeta">${x.job?`<span class="srctag">${T('Dari rekod jawatan')}</span><br>`:''}<b>${esc(x.tajuk)}</b>${sub?`<span>${esc(sub)}</span><br>`:''}<span class="ifile">${esc(f.name||'')} (${fmtSize(f.size||0)})${when?', '+T('dimuat naik')+' '+esc(when):''}${f.uploadedBy?' '+T('oleh')+' '+esc(f.uploadedBy):''}</span></div></div>
+      <div class="pdfact"><button class="btn" data-ik-open="${esc(x.id)}">${T('Buka')}</button><button class="btn" data-ik-dl="${esc(x.id)}">${T('Muat turun')}</button>${x.job?`<button class="btn" data-ik-job="${esc(x.job.id)}">${T('Lihat jawatan')}</button>`:(isAdmin?`<button class="linkbtn" data-ik-del="${esc(x.id)}">${T('Buang')}</button>`:'')}</div></div>`;
   }).join('');
-  const byId=id=>iklans.find(x=>x.id===id);
-  box.querySelectorAll('[data-ik-open]').forEach(b=>b.onclick=()=>openFile(byId(b.dataset.ikOpen)?.fail,false));
-  box.querySelectorAll('[data-ik-dl]').forEach(b=>b.onclick=()=>openFile(byId(b.dataset.ikDl)?.fail,true));
-  box.querySelectorAll('[data-ik-del]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikDel);if(!x)return;ask(T('Buang iklan ini?'),T('“{n}” akan dibuang untuk semua pengguna.',{n:x.tajuk}),async()=>{try{await deleteDoc(doc(fdb,'iklan',x.id));delChunks(x.fail).catch(()=>{});toast(T('Iklan dibuang.'))}catch(e){toast(errMsg(e))}})});
+  const byId=id=>list.find(x=>x.id===id);
+  box.querySelectorAll('[data-ik-job]').forEach(b=>b.onclick=()=>openDrawer(b.dataset.ikJob));
+  box.querySelectorAll('[data-ik-open]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikOpen);openFile(x?.fail,false,x?(x.job?jobName(x.job):'Iklan: '+x.tajuk):'')});
+  box.querySelectorAll('[data-ik-dl]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikDl);openFile(x?.fail,true,x?(x.job?jobName(x.job):'Iklan: '+x.tajuk):'')});
+  box.querySelectorAll('[data-ik-del]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikDel);if(!x)return;ask(T('Buang iklan ini?'),T('“{n}” akan dibuang untuk semua pengguna.',{n:x.tajuk}),async()=>{try{await deleteDoc(doc(fdb,'iklan',x.id));audit('remove_iklan',x.tajuk,{file:x.fail&&x.fail.name||''});delChunks(x.fail).catch(()=>{});toast(T('Iklan dibuang.'))}catch(e){toast(errMsg(e))}})});
 }
 function watchIklan(){
   if(unsubIklan)return;
   unsubIklan=onSnapshot(collection(fdb,'iklan'),s=>{iklans=s.docs.map(d=>({id:d.id,...d.data()}));iklanLoaded=true;if(mode==='iklan')renderIklanList();},()=>{iklanLoaded=true;if(mode==='iklan')renderIklanList();});
+}
+
+/* ---------- audit panel (admin) ---------- */
+const AUDIT_MAX=1000;
+function watchAudit(){
+  if(unsubAudit||!isAdmin)return;
+  unsubAudit=onSnapshot(query(collection(fdb,'audit'),orderBy('at','desc'),limit(AUDIT_MAX)),s=>{audits=s.docs.map(d=>({id:d.id,...d.data()}));auditLoaded=true;if(mode==='audit')renderAuditList();},
+    e=>{auditLoaded=true;audits=[];if(mode==='audit'){const b=$('auList');if(b)b.innerHTML=`<p class="pdfnone">${esc(errMsg(e))}</p>`;}});
+}
+const auDate=x=>x.at&&x.at.toDate?x.at.toDate():new Date();
+const fieldLabel=k=>{for(const g of FORM)for(const f of g.fields)if(f[0]===k)return T(f[1]);return k;};
+function auDetail(x){
+  const p=[];
+  if(x.fields&&x.fields.length)p.push(T('Medan diubah')+': '+x.fields.map(fieldLabel).join(', '));
+  if(x.file)p.push(T('Fail')+': '+x.file);
+  if(x.role)p.push(T('Peranan')+': '+(x.role==='admin'?T('Admin'):T('Paparan sahaja')));
+  if(x.ref)p.push(T('Rujukan iklan')+': '+x.ref);
+  if(x.count!=null)p.push(T('{n} rekod',{n:x.count}));
+  if(x.replaced)p.push(T('menggantikan fail lama'));
+  return p.join(' · ');
+}
+function auFiltered(){
+  const q=AF.q.trim().toLowerCase();
+  return audits.filter(x=>{
+    const a=AUDIT[x.action]||[x.action,'view'];
+    if(AF.cat&&a[1]!==AF.cat&&!(AF.cat==='login'&&a[1]==='denied'))return false;
+    if(AF.who&&x.email!==AF.who)return false;
+    if(q&&![x.name,x.email,T(a[0]),x.target,x.file].join(' ').toLowerCase().includes(q))return false;
+    return true;
+  });
+}
+function renderAudit(){
+  $('dTitle').textContent=T('Log Audit');
+  $('dSub').textContent=T('Rekod log masuk, fail yang dilihat dan kemas kini oleh semua pengguna. Hanya admin boleh melihat log ini.');
+  const whos=[...new Map(audits.map(x=>[x.email,x.name||x.email])).entries()].sort((a,b)=>a[1].localeCompare(b[1]));
+  $('dBody').innerHTML=`<div class="afil">
+      <select id="auCat" aria-label="${T('Jenis aktiviti')}"><option value="">${T('Semua aktiviti')}</option><option value="login" ${AF.cat==='login'?'selected':''}>${T('Log masuk / keluar')}</option><option value="view" ${AF.cat==='view'?'selected':''}>${T('Lihat & muat turun')}</option><option value="update" ${AF.cat==='update'?'selected':''}>${T('Kemas kini')}</option></select>
+      <select id="auWho" aria-label="${T('Pengguna')}"><option value="">${T('Semua pengguna')}</option>${whos.map(([e,n])=>`<option value="${esc(e)}" ${AF.who===e?'selected':''}>${esc(n===e?e:n+' ('+e+')')}</option>`).join('')}</select>
+      <input id="auQ" type="search" placeholder="${T('Cari…')}" value="${esc(AF.q)}" aria-label="${T('Cari')}">
+    </div>
+    <div class="ihead"><span class="count" id="auCount"></span><span class="spacer"></span><button class="btn" id="auCsv">${T('Muat turun CSV')}</button></div>
+    <ul class="alist" id="auList"></ul>`;
+  $('dFoot').hidden=true;$('dFoot').innerHTML='';
+  $('auCat').onchange=e=>{AF.cat=e.target.value;renderAuditList()};
+  $('auWho').onchange=e=>{AF.who=e.target.value;renderAuditList()};
+  $('auQ').oninput=e=>{AF.q=e.target.value;renderAuditList()};
+  $('auCsv').onclick=auditCsv;
+  renderAuditList();
+}
+function renderAuditList(){
+  const box=$('auList');if(!box)return;
+  if(!auditLoaded){box.innerHTML=`<li><span></span><span class="pdfnone">${T('Memuatkan…')}</span></li>`;$('auCount').textContent='';return}
+  const list=auFiltered();
+  $('auCount').textContent=T('{a} daripada {b} rekod terkini',{a:list.length,b:audits.length});
+  if(!list.length){box.innerHTML=`<li><span></span><span class="pdfnone">${T('Tiada rekod.')}</span></li>`;return}
+  box.innerHTML=list.slice(0,400).map(x=>{
+    const a=AUDIT[x.action]||[x.action,'view'],d=auDate(x),det=auDetail(x);
+    return `<li><span class="at">${esc(d.toLocaleDateString(LOC(),{day:'2-digit',month:'short',year:'numeric'}))}<br>${esc(d.toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'}))}</span>
+      <span class="who2"><b>${esc(x.name||x.email)}</b>${x.name?` <span>${esc(x.email)}</span>`:''}</span>
+      <span class="what"><span class="abadge ${a[1]}">${esc(T(a[0]))}</span>${esc(x.target||'')}</span>
+      ${det?`<span class="det">${esc(det)}</span>`:''}</li>`;
+  }).join('')+(list.length>400?`<li><span></span><span class="pdfnone">${T('Menunjukkan 400 rekod pertama. Gunakan tapisan atau muat turun CSV untuk semua.')}</span></li>`:'');
+  // repopulate user list if new people appear
+  const sel=$('auWho');if(sel&&sel.options.length-1<new Set(audits.map(x=>x.email)).size&&document.activeElement!==sel){const keep=AF.q;renderAudit();AF.q=keep;}
+}
+function auditCsv(){
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const rowsCsv=auFiltered().map(x=>{const d=auDate(x),a=AUDIT[x.action]||[x.action];return [d.toLocaleString(LOC()),x.name||'',x.email,T(a[0]),x.target||'',auDetail(x)].map(q).join(',')});
+  const csv='\ufeff'+[[T('Masa'),T('Nama'),T('Emel'),T('Aktiviti'),T('Perkara'),T('Butiran')].map(q).join(','),...rowsCsv].join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  const d=new Date();a.download=`Log_Audit_${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.csv`;
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},800);
 }
 
 /* ---------- users (admin) ---------- */
@@ -841,12 +971,12 @@ function renderUsers(){
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast(T('Masukkan alamat emel yang sah.'));return}
     if(email===OWNER_EMAIL.toLowerCase()){toast(T('Emel ini sudah admin utama.'));return}
     $('uAdd').disabled=true;
-    try{await setDoc(doc(fdb,'users',email),{role:fd.get('role'),nama:String(fd.get('nama')||'').trim(),addedBy:me.email,addedAt:new Date().toISOString()});toast(T('Pengguna ditambah.'));}
+    try{await setDoc(doc(fdb,'users',email),{role:fd.get('role'),nama:String(fd.get('nama')||'').trim(),addedBy:me.email,addedAt:new Date().toISOString()});audit('add_user',email,{role:fd.get('role')});toast(T('Pengguna ditambah.'));}
     catch(err){toast(errMsg(err))}
     finally{if($('uAdd'))$('uAdd').disabled=false}
   };
-  $('dBody').querySelectorAll('[data-role]').forEach(s=>s.onchange=async()=>{try{await setDoc(doc(fdb,'users',s.dataset.role),{role:s.value},{merge:true});toast(T('Peranan dikemas kini.'))}catch(e){toast(errMsg(e))}});
-  $('dBody').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>ask(T('Buang pengguna ini?'),T('{e} tidak lagi boleh membuka sistem.',{e:b.dataset.del}),async()=>{try{await deleteDoc(doc(fdb,'users',b.dataset.del));toast(T('Pengguna dibuang.'))}catch(e){toast(errMsg(e))}}));
+  $('dBody').querySelectorAll('[data-role]').forEach(s=>s.onchange=async()=>{try{await setDoc(doc(fdb,'users',s.dataset.role),{role:s.value},{merge:true});audit('change_role',s.dataset.role,{role:s.value});toast(T('Peranan dikemas kini.'))}catch(e){toast(errMsg(e))}});
+  $('dBody').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>ask(T('Buang pengguna ini?'),T('{e} tidak lagi boleh membuka sistem.',{e:b.dataset.del}),async()=>{try{await deleteDoc(doc(fdb,'users',b.dataset.del));audit('remove_user',b.dataset.del);toast(T('Pengguna dibuang.'))}catch(e){toast(errMsg(e))}}));
   $('impBtn').onclick=()=>$('impFile').click();
   $('impFile').onchange=async e=>{
     const f=e.target.files[0];if(!f)return;
@@ -854,7 +984,7 @@ function renderUsers(){
       const data=JSON.parse(await f.text());const ids=Object.keys(data);
       if(!ids.length)throw new Error('kosong');
       ask(T('Import data?'),T('{n} rekod akan dimasukkan ke dalam sistem.',{n:ids.length}),async()=>{
-        try{const b=writeBatch(fdb);ids.slice(0,450).forEach(id=>b.set(doc(fdb,'jawatan',id),data[id]));await b.commit();toast(T('{n} rekod diimport.',{n:Math.min(ids.length,450)}));}
+        try{const b=writeBatch(fdb);ids.slice(0,450).forEach(id=>b.set(doc(fdb,'jawatan',id),data[id]));await b.commit();audit('import','data-awal.json',{count:Math.min(ids.length,450)});toast(T('{n} rekod diimport.',{n:Math.min(ids.length,450)}));}
         catch(err){toast(errMsg(err))}
       },T('Import'));
     }catch(err){toast(T('Fail tidak dapat dibaca. Gunakan data-awal.json.'))}
@@ -943,6 +1073,7 @@ async function exportExcel(){
     const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
     a.download=`Proses_Jawatan_Kosong_${F.tahun?F.tahun+'_':''}${stamp}.xlsx`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},800);
     toast(T('Fail Excel dimuat turun.'));
+    audit('export_excel',a.download,{count:list.length});
   }catch(e){console.error(e);toast(T('Fail Excel tidak dapat dibuat. Semak sambungan internet dan cuba lagi.'));}
   finally{btn.disabled=false;}
 }
@@ -961,8 +1092,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('confirm').cla
 $('addBtn').onclick=()=>openDrawer(null,'new');
 $('usersBtn').onclick=()=>openDrawer(null,'users');
 $('iklanBtn').onclick=()=>openDrawer(null,'iklan');
+$('auditBtn').onclick=()=>{watchAudit();openDrawer(null,'audit');};
 $('exportBtn').onclick=exportExcel;
-$('logoutBtn').onclick=()=>signOut(auth);
+$('logoutBtn').onclick=async()=>{$('logoutBtn').disabled=true;await audit('logout');try{sessionStorage.removeItem('pjk-login-'+(me&&me.uid))}catch(e){};$('logoutBtn').disabled=false;signOut(auth);};
 $('deniedOut').onclick=()=>signOut(auth);
 
 /* ---------- start ---------- */
@@ -984,6 +1116,8 @@ else{
     if(unsubRows){unsubRows();unsubRows=null}
     if(unsubUsers){unsubUsers();unsubUsers=null}
     if(unsubIklan){unsubIklan();unsubIklan=null}
+    if(unsubAudit){unsubAudit();unsubAudit=null}
+    audits=[];auditLoaded=false;
     iklans=[];iklanLoaded=false;
     rows=[];users=[];loaded=false;closeDrawer();
     if(!u){me=null;show('sLogin');return}
@@ -991,10 +1125,12 @@ else{
     let role=null;
     if(email===OWNER_EMAIL.toLowerCase())role='admin';
     else{try{const s=await getDoc(doc(fdb,'users',email));if(s.exists())role=s.data().role==='admin'?'admin':'viewer';}catch(e){}}
-    if(!role){$('deniedEmail').textContent=u.email;show('sDenied');return}
+    const once=k=>{try{if(sessionStorage.getItem(k))return false;sessionStorage.setItem(k,'1');}catch(e){}return true;};
+    if(!role){$('deniedEmail').textContent=u.email;show('sDenied');if(once('pjk-denied-'+u.uid))audit('login_denied');return}
+    if(once('pjk-login-'+u.uid))audit('login','',{role});
     isAdmin=role==='admin';
     $('whoName').textContent=u.displayName||u.email;
-    $('whoEmail').textContent=u.displayName?u.email:'';
+    $('whoEmail').textContent=u.displayName?u.email:'';$('whoName').title=u.email||'';
     if(u.photoURL){$('whoAv').src=u.photoURL;$('whoAv').referrerPolicy='no-referrer'}else $('whoAv').removeAttribute('src');
     show('sApp');renderAll();
     unsubRows=onSnapshot(collection(fdb,'jawatan'),s=>{rows=s.docs.map(d=>({id:d.id,...d.data()}));loaded=true;$('notice').innerHTML='';renderAll();},
