@@ -1664,10 +1664,13 @@ function renderUsers(){
     try{
       if(!/\.xlsx$/i.test(file.name))throw new Error('Sila pilih fail Excel .xlsx.');
       const ExcelJS=await loadExcelJS();
+      if(!ExcelJS||!ExcelJS.Workbook)throw new Error('Pustaka Excel tidak tersedia. Muat semula halaman dan cuba lagi.');
+      if(typeof file.arrayBuffer!=='function')throw new Error('Pelayar ini tidak menyokong bacaan fail Excel. Cuba Chrome atau Edge yang terkini.');
       const wb=new ExcelJS.Workbook();
-      await wb.xlsx.load(await file.arrayBuffer());
-      const ws=wb.worksheets[0];
-      if(!ws||ws.rowCount<2)throw new Error('Fail Excel tiada rekod.');
+      try{await wb.xlsx.load(await file.arrayBuffer());}
+      catch(parseError){throw new Error('Fail Excel tidak dapat dibuka. Pastikan fail ialah .xlsx sebenar (bukan .xls/CSV) dan tidak rosak atau dilindungi kata laluan.');}
+      const ws=wb.worksheets&&wb.worksheets[0];
+      if(!ws||ws.rowCount<2)throw new Error('Lembaran pertama Excel kosong atau tiada rekod. Pastikan baris pertama mengandungi tajuk lajur dan data bermula pada baris kedua.');
       const norm=v=>String(v??'').toLowerCase().replace(/[\s\n\r./_-]+/g,' ').trim();
       const cellText=c=>{
         if(!c)return '';
@@ -1808,8 +1811,26 @@ const XL_EXTRA=['FFFF99','CCFFCC','FFCC99','CCFFFF','FF99CC'];
 const XL_MONTH_EN=['january','february','march','april','may','june','july','august','september','october','november','december'];
 let xlLoad=null;
 function loadExcelJS(){
-  if(window.ExcelJS)return Promise.resolve(window.ExcelJS);
-  return xlLoad||(xlLoad=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';s.onload=()=>res(window.ExcelJS);s.onerror=()=>{xlLoad=null;rej(new Error('load'))};document.head.appendChild(s);}));
+  if(window.ExcelJS&&window.ExcelJS.Workbook)return Promise.resolve(window.ExcelJS);
+  if(xlLoad)return xlLoad;
+  xlLoad=new Promise((resolve,reject)=>{
+    const sources=[
+      'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js',
+      'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js'
+    ];
+    let index=0;
+    const tryNext=()=>{
+      if(window.ExcelJS&&window.ExcelJS.Workbook){resolve(window.ExcelJS);return;}
+      if(index>=sources.length){xlLoad=null;reject(new Error('Tidak dapat memuat pustaka Excel. Semak sambungan internet atau sekatan rangkaian, kemudian cuba lagi.'));return;}
+      const s=document.createElement('script');
+      s.src=sources[index++];s.async=true;
+      s.onload=()=>{if(window.ExcelJS&&window.ExcelJS.Workbook)resolve(window.ExcelJS);else tryNext();};
+      s.onerror=tryNext;
+      document.head.appendChild(s);
+    };
+    tryNext();
+  });
+  return xlLoad;
 }
 function xlDate(v){
   const m=String(v??'').trim().match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
