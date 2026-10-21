@@ -988,7 +988,7 @@ const EN={
 'Tiada jawatan sepadan dengan tapisan.':'No posts match the filters.','Ubah carian atau kosongkan tapisan.':'Change the search or clear the filters.',
 '{a} daripada {b} jawatan':'{a} of {b} posts','{a} daripada {b}':'{a} of {b}',
 'Semua tahun':'All years','Semua kod':'All codes','Admin':'Admin','Paparan sahaja':'View only',
-'(Tanpa nama)':'(Untitled)','Peringkat semasa':'Current stage','Kekosongan':'Vacancies','Tangga gaji':'Salary scale','Pegawai bertugas':'Officer in charge','Rujukan iklan':'Advert reference','Jenis iklan':'Advert type',
+'(Tanpa nama)':'(Untitled)','Peringkat semasa':'Current stage','Kekosongan':'Vacancies','Tangga gaji':'Salary scale','Pegawai bertugas':'Officer in charge','Bilangan Iklan':'Advert number','Jenis iklan':'Advert type',
 'Tiada butiran lantikan':'No appointment details','Belum selesai':'Not completed yet','Lantikan / keputusan':'Appointment / outcome','Tidak berkaitan':'Not applicable','Belum ditetapkan':'Not set yet',
 'Catatan':'Notes','Dikemas kini':'Updated','oleh':'by','dimuat naik':'uploaded',
 'Edit maklumat':'Edit details','Padam':'Delete','Padam jawatan ini?':'Delete this post?','“{n}” akan dibuang untuk semua pengguna.':'“{n}” will be removed for all users.','Jawatan dipadam.':'Post deleted.',
@@ -1002,7 +1002,7 @@ const EN={
 'Calon lantikan':'Appointment candidates','Rekod Lantikan':'Appointment Records','Tiada rekod lantikan.':'No appointment records yet.','jawatan mempunyai rekod lantikan.':'posts have appointment records.','Lihat butiran jawatan':'View post details',
 'Hubungi':'Contact','Maklumat Perhubungan':'Contact Information','Urus Setia Pengambilan Kementerian':'Ministry Recruitment Secretariat','Tambah jawatan':'Add post','Rekod baharu akan dipaparkan kepada semua pengguna.':'The new record will be shown to all users.','Simpan perubahan':'Save changes','Batal':'Cancel',
 'Nama jawatan diperlukan.':'Post title is required.','Menyimpan…':'Saving…','Jawatan ditambah.':'Post added.','Perubahan disimpan.':'Changes saved.',
-'Buka':'Open','Muat turun':'Download','Tukar fail':'Replace file','Buang':'Remove','Belum ada fail iklan.':'No advert file yet.','Muat naik PDF':'Upload PDF','Belum ada fail iklan dimuat naik.':'No advert file uploaded yet.',
+'Buka':'Open','Muat turun':'Download','Tukar fail':'Replace file','Buang':'Remove','Belum ada fail iklan.':'No advert file yet.','Muat naik PDF':'Upload PDF','Belum ada fail iklan dimuat naik.':'No advert file uploaded yet.','PDF yang dimuat naik di sini akan muncul secara automatik dalam Senarai iklan.':'PDF uploaded here will automatically appear in the Advert list.',
 'Iklan jawatan (PDF)':'Job advert (PDF)','Buang fail iklan?':'Remove advert file?','Fail iklan dibuang.':'Advert file removed.','Sila pilih fail PDF.':'Please choose a PDF file.',
 'Fail terlalu besar. Had maksimum 10 MB.':'File is too large. The limit is 10 MB.','Memuat naik… {p}%':'Uploading… {p}%','Fail iklan dimuat naik.':'Advert file uploaded.','Memuatkan fail…':'Loading file…','Fail tidak dapat dibuka. Cuba lagi.':'The file could not be opened. Please try again.',
 'Iklan Jawatan':'Job Adverts','Fail PDF iklan jawatan kosong. Semua pengguna boleh membuka dan memuat turun.':'PDF files of job vacancy adverts. All users can open and download them.',
@@ -1159,7 +1159,7 @@ function renderAppointments(){
     <div class="ilist">${items.map(r=>`<article class="iitem">
       <div class="ihead"><h3>${esc(r.jawatan||T('(Tanpa nama)'))}</h3><span class="kod">${esc(r.kod||'—')}</span></div>
       <div class="dept">${esc(r.jabatan||'')}</div>
-      ${!blank(r.rujukanIklan)?`<div class="ref">${T('Rujukan iklan')}: ${esc(r.rujukanIklan)}</div>`:''}
+      ${!blank(r.rujukanIklan)?`<div class="ref">${T('Bilangan Iklan')}: ${esc(r.rujukanIklan)}</div>`:''}
       <div class="block">${esc(r.lantikan)}</div>
       <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn" data-open-job="${esc(r.id)}">${T('Lihat butiran jawatan')} →</button></div>
     </article>`).join('')}</div>`;
@@ -1176,7 +1176,7 @@ function renderDrawer(){
   if(mode==='edit')return renderForm(r);
   $('dTitle').textContent=r.jawatan||T('(Tanpa nama)');$('dSub').textContent=r.jabatan||'';
   const idx=stageIdx(r),done=r.status==='SELESAI';
-  const facts=[[T('Peringkat semasa'),STAGES[idx]?T(STAGES[idx].l):r.status],[T('Kekosongan'),r.kekosongan],[T('Tangga gaji'),r.tanggaGaji],[T('Pegawai bertugas'),r.kod],[T('Rujukan iklan'),r.rujukanIklan],[T('Jenis iklan'),r.jenisIklan]];
+  const facts=[[T('Peringkat semasa'),STAGES[idx]?T(STAGES[idx].l):r.status],[T('Kekosongan'),r.kekosongan],[T('Tangga gaji'),r.tanggaGaji],[T('Pegawai bertugas'),r.kod],[T('Bilangan Iklan'),r.rujukanIklan],[T('Jenis iklan'),r.jenisIklan]];
   let html=`<dl class="facts">${facts.map(([k,v])=>`<div><dt>${k}</dt><dd>${blank(v)?'—':esc(v)}</dd></div>`).join('')}</dl>${pdfSection(r)}<ol class="tl">`;
   STAGES.forEach((s,i)=>{
     const cls=done||i<idx?'d':i===idx?'c':'';let body='';
@@ -1196,7 +1196,7 @@ function renderDrawer(){
 
 const FORM=[
   {legend:'Maklumat jawatan',fields:[['jawatan','Nama jawatan','text','full',true],['jabatan','Jabatan / bahagian','text','full'],['status','Peringkat semasa','status'],['kod','Pegawai bertugas (kod)','text','',false,'cth. SR atau SR/RS'],['tanggaGaji','Tangga gaji','text'],['kekosongan','Bilangan kekosongan','number']]},
-  {legend:'Butiran iklan',fields:[['rujukanIklan','Rujukan iklan','text','',false,'cth. 2026/OCT/01/KPDK'],['jenisIklan','Jenis iklan','text','',false,'cth. Iklan 7A'],['tarikhIklan','Tarikh iklan','text'],['tarikhTutup','Tarikh tutup iklan','text']]},
+  {legend:'Butiran iklan',fields:[['rujukanIklan','Bilangan Iklan','text','',false,'cth. 2026/OCT/01/KPDK'],['jenisIklan','Jenis iklan','text','',false,'cth. Iklan 7A'],['tarikhIklan','Tarikh iklan','text'],['tarikhTutup','Tarikh tutup iklan','text']]},
   {legend:'Tarikh proses',hint:'Taip seperti biasa, cth. 03 April 2024 atau 11 - 16 Mei 2026. Gunakan “-” jika tidak berkaitan.',fields:[['tarikhPerakuan','Tarikh perakuan','text'],['tarikhUjian','Tarikh ujian','text'],['tarikhVerifikasi','Tarikh verifikasi','area','full'],['tarikhTemuduga','Tarikh temu duga','area','full'],['tarikhQCT','Tarikh dihadapkan ke SPA untuk QCT','text'],['tarikhKertasSokongan','Tarikh kertas kerja sokongan','text']]},
   {legend:'Keputusan',fields:[['lantikan','Lantikan / keputusan','area','full',false,'Nama calon, rujukan surat dan tarikh'],['catatan','Catatan dalaman','area','full']]}
 ];
@@ -1247,7 +1247,7 @@ function pdfSection(r){
     inner=`<div class="pdfcard"><div class="pdfic" aria-hidden="true">PDF</div><div class="pdfmeta"><b>${esc(f.name)}</b><span>${fmtSize(f.size||0)}${when?', '+T('dimuat naik')+' '+esc(when):''}${f.uploadedBy?' '+T('oleh')+' '+esc(f.uploadedBy):''}</span></div></div>
       <div class="pdfact"><button class="btn" id="pdfOpen">${T('Buka')}</button><button class="btn" id="pdfDl">${T('Muat turun')}</button>${isAdmin?`<button class="btn" id="pdfUp">${T('Tukar fail')}</button><button class="linkbtn" id="pdfDel">${T('Buang')}</button>`:''}</div>`;
   }else inner=isAdmin?`<p class="pdfnone">${T('Belum ada fail iklan.')}</p><button class="btn primary" id="pdfUp">${T('Muat naik PDF')}</button>`:`<p class="pdfnone">${T('Belum ada fail iklan dimuat naik.')}</p>`;
-  return `<section class="pdfsec"><h3>${T('Iklan jawatan (PDF)')}</h3>${inner}<input type="file" id="pdfFile" accept="application/pdf,.pdf" hidden></section>`;
+  return `<section class="pdfsec"><h3>${T('Iklan jawatan (PDF)')}</h3>${inner}<p class="pdfnone" style="margin:8px 0 0">${T('PDF yang dimuat naik di sini akan muncul secara automatik dalam Senarai iklan.')}</p><input type="file" id="pdfFile" accept="application/pdf,.pdf" hidden></section>`;
 }
 function wirePdf(r){
   const up=$('pdfUp');
@@ -1271,7 +1271,11 @@ async function uploadPdf(r,file){
     const meta=await writeChunks(file,pct=>setP(T('Memuat naik… {p}%',{p:pct})));
     const old=r.iklanPdf;
     await setDoc(doc(fdb,'jawatan',r.id),{iklanPdf:meta},{merge:true});
-    audit('upload_pdf',jobName(r),{file:file.name,replaced:!!(r.iklanPdf&&r.iklanPdf.id)});
+    // Update the local record immediately; the live Firestore listener will confirm it too.
+    r.iklanPdf=meta;
+    rows=rows.map(item=>item.id===r.id?{...item,iklanPdf:meta}:item);
+    renderAll();
+    audit('upload_pdf',jobName(r),{file:file.name,replaced:!!(old&&old.id)});
     if(old&&old.id)delChunks(old).catch(()=>{});
     toast(T('Fail iklan dimuat naik.'));
   }catch(e){toast(errMsg(e));if(openId===r.id&&mode==='view')renderDrawer();}
@@ -1556,7 +1560,7 @@ function auDetail(x){
   if(x.fields&&x.fields.length)p.push(T('Medan diubah')+': '+x.fields.map(fieldLabel).join(', '));
   if(x.file)p.push(T('Fail')+': '+x.file);
   if(x.role)p.push(T('Peranan')+': '+(x.role==='admin'?T('Admin'):T('Paparan sahaja')));
-  if(x.ref)p.push(T('Rujukan iklan')+': '+x.ref);
+  if(x.ref)p.push(T('Bilangan Iklan')+': '+x.ref);
   if(x.count!=null)p.push(T('{n} rekod',{n:x.count}));
   if(x.replaced)p.push(T('menggantikan fail lama'));
   return p.join(' · ');
