@@ -257,6 +257,13 @@ label.f textarea{min-height:76px;resize:vertical;line-height:1.45}
 .ihead h3{margin:0;font-size:15px;flex:1}
 .isearch{width:100%;margin:0 0 12px;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:9px 12px;min-height:40px}
 .ifile{font-size:13px;color:var(--muted);word-break:break-all}
+.idates{font-size:12.5px;color:var(--ink)}
+.datef{position:relative;display:block}
+.datef input[type=text]{padding-right:42px!important}
+.calbtn{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--muted);cursor:pointer;padding:6px;border-radius:7px;display:grid;place-items:center}
+.calbtn:hover{background:var(--surface-2);color:var(--ink)}
+.calbtn svg{width:18px;height:18px}
+.dpick{position:absolute;left:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0;min-height:0!important}
 .srctag{display:inline-block;font-size:11px;font-weight:700;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:0 7px;margin-bottom:3px}
 .pdftag{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:800;padding:1px 5px;border-radius:4px;background:#C62828;color:#fff;vertical-align:1px}
 .card .logo{height:76px;margin:0 auto 8px}
@@ -384,7 +391,7 @@ label.f textarea{min-height:76px;resize:vertical;line-height:1.45}
       <input id="q" type="search" placeholder="Cari…" data-i18n-ph="Cari…" aria-label="Cari">
     </label>
     <select id="tahun" aria-label="Tahun"><option value="" data-i18n="Semua tahun">Semua tahun</option></select>
-    <select id="kod" aria-label="Pegawai bertugas"><option value="" data-i18n="Semua pegawai">Semua pegawai</option></select>
+    <select id="kod" aria-label="Kod"><option value="" data-i18n="Semua kod">Semua kod</option></select>
     <select id="sort" aria-label="Susun">
       <option value="bil" data-i18n="Susun ikut bil.">Susun ikut bil.</option>
       <option value="baru" data-i18n="Iklan terbaru">Iklan terbaru</option>
@@ -408,7 +415,7 @@ label.f textarea{min-height:76px;resize:vertical;line-height:1.45}
   <section class="list" aria-live="polite">
     <table>
       <thead><tr>
-        <th data-i18n="Bil.">Bil.</th><th data-i18n="Jawatan / jabatan">Jawatan / jabatan</th><th data-i18n="Tangga gaji">Tangga gaji</th><th style="text-align:right" data-i18n="Kekosongan">Kekosongan</th><th data-i18n="Peringkat">Peringkat</th><th data-i18n="Pegawai">Pegawai</th>
+        <th data-i18n="Bil.">Bil.</th><th data-i18n="Jawatan / jabatan">Jawatan / jabatan</th><th data-i18n="Tangga gaji">Tangga gaji</th><th style="text-align:right" data-i18n="Kekosongan">Kekosongan</th><th data-i18n="Peringkat">Peringkat</th><th data-i18n="Kod">Kod</th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table>
@@ -466,7 +473,7 @@ const STAGES=[
   {k:'UJIAN',l:'Ujian',fields:[['tarikhUjian','Tarikh ujian']]},
   {k:'VERIFIKASI',l:'Verifikasi',fields:[['tarikhVerifikasi','Tarikh verifikasi']]},
   {k:'TEMUDUGA',l:'Temu duga',fields:[['tarikhTemuduga','Tarikh temu duga']]},
-  {k:'SPA (QCT)',l:'Dihadapkan ke SPA',fields:[['tarikhQCT','Tarikh dihadapkan ke SPA untuk QCT']]},
+  {k:'SPA (QCT)',l:'Dihadapkan ke SPA (QCT)',fields:[['tarikhQCT','Tarikh dihadapkan ke SPA untuk QCT']]},
   {k:'KERTAS SOKONGAN',l:'Kertas sokongan',fields:[['tarikhKertasSokongan','Tarikh kertas kerja sokongan']]},
   {k:'SELESAI',l:'Selesai',fields:[]}
 ];
@@ -497,7 +504,7 @@ const EN={
 'Cari…':'Search…','Susun ikut bil.':'Sort by no.','Iklan terbaru':'Newest advert','Iklan terawal':'Oldest advert','Ikut peringkat':'By stage','Kekosongan terbanyak':'Most vacancies',
 'Kosongkan tapisan':'Clear filters','Bil.':'No.','Jawatan / jabatan':'Post / department','Pegawai':'Officer','Peringkat':'Stage','Padam?':'Delete?',
 'Peringkat {n}':'Stage {n}',
-'Iklan':'Advertised','Perakuan':'Certification','Ujian':'Test','Verifikasi':'Verification','Temu duga':'Interview','Dihadapkan ke SPA':'Submitted to PSC','Kertas sokongan':'Supporting paper','Selesai':'Completed',
+'Iklan':'Advertised','Perakuan':'Certification','Ujian':'Test','Verifikasi':'Verification','Temu duga':'Interview','Dihadapkan ke SPA (QCT)':'Submitted to PSC (QCT)','Kertas sokongan':'Supporting paper','Selesai':'Completed',
 '{v} kekosongan':v=>v.v==1?'1 vacancy':'{v} vacancies','Tiada':'None',
 'Tahun {y}: ':'Year {y}: ','{t} jawatan, {v} kekosongan.':v=>(v.t==1?'1 post':'{t} posts')+', '+(v.v==1?'1 vacancy.':'{v} vacancies.'),'{a} jawatan ({av} kekosongan) masih dalam proses.':v=>(v.a==1?'1 post':'{a} posts')+' ('+(v.av==1?'1 vacancy':'{av} vacancies')+') still in progress.',
 'Tiada jawatan untuk tahun {y}.':'No posts for {y}.','Belum ada jawatan direkodkan.':'No posts recorded yet.',
@@ -506,7 +513,7 @@ const EN={
 'Rekod akan dipaparkan di sini setelah dimasukkan oleh admin.':'Records will appear here once the admin adds them.',
 'Tiada jawatan sepadan dengan tapisan.':'No posts match the filters.','Ubah carian atau kosongkan tapisan.':'Change the search or clear the filters.',
 '{a} daripada {b} jawatan':'{a} of {b} posts','{a} daripada {b}':'{a} of {b}',
-'Semua tahun':'All years','Semua pegawai':'All officers','Admin':'Admin','Paparan sahaja':'View only',
+'Semua tahun':'All years','Semua kod':'All codes','Admin':'Admin','Paparan sahaja':'View only',
 '(Tanpa nama)':'(Untitled)','Peringkat semasa':'Current stage','Kekosongan':'Vacancies','Tangga gaji':'Salary scale','Pegawai bertugas':'Officer in charge','Rujukan iklan':'Advert reference','Jenis iklan':'Advert type',
 'Tiada butiran lantikan':'No appointment details','Belum selesai':'Not completed yet','Lantikan / keputusan':'Appointment / outcome','Tidak berkaitan':'Not applicable','Belum ditetapkan':'Not set yet',
 'Catatan':'Notes','Dikemas kini':'Updated','oleh':'by','dimuat naik':'uploaded',
@@ -541,7 +548,10 @@ const EN={
 'Domain laman ini belum dibenarkan dalam Firebase (Authentication > Settings > Authorized domains).':'This site’s domain is not yet allowed in Firebase (Authentication > Settings > Authorized domains).',
 'Log masuk tidak berjaya. Cuba lagi.':'Sign-in failed. Please try again.',
 'Akses anda telah ditarik balik. Log keluar dan hubungi admin.':'Your access has been removed. Sign out and contact the admin.','Sambungan ke data terputus. Muat semula halaman.':'Connection to the data was lost. Reload the page.',
-'Audit':'Audit','Dari rekod jawatan':'From a post record','Lihat jawatan':'View post','Log Audit':'Audit Log',
+'Audit':'Audit','Kod':'Code','Bilangan iklan':'Advert number','Tajuk iklan (pilihan)':'Advert title (optional)','Tarikh tutup iklan (pilihan)':'Closing date (optional)','Tarikh tutup':'Closing date',
+'Bilangan iklan diperlukan.':'Advert number is required.','Tarikh tidak sah. Gunakan format dd/mm/yyyy.':'Invalid date. Use the dd/mm/yyyy format.',
+'Tarikh tutup tidak boleh lebih awal daripada tarikh iklan.':'The closing date cannot be before the advert date.','Pilih tarikh':'Choose date',
+'Cari bilangan, tajuk iklan atau nama fail':'Search advert number, title or file name','Dari rekod jawatan':'From a post record','Lihat jawatan':'View post','Log Audit':'Audit Log',
 'Rekod log masuk, fail yang dilihat dan kemas kini oleh semua pengguna. Hanya admin boleh melihat log ini.':'Sign-ins, files viewed and updates by all users. Only admins can see this log.',
 'Log masuk':'Sign in','Cubaan log masuk (tidak berdaftar)':'Sign-in attempt (not registered)','Lihat butiran jawatan':'Viewed post details','Buka PDF':'Opened PDF','Muat turun PDF':'Downloaded PDF','Muat turun Excel':'Downloaded Excel',
 'Kemas kini jawatan':'Updated post','Muat naik PDF jawatan':'Uploaded post PDF','Buang PDF jawatan':'Removed post PDF','Muat naik iklan':'Uploaded advert','Buang iklan':'Removed advert','Tukar peranan':'Changed role','Import data':'Imported data',
@@ -648,7 +658,7 @@ function renderYears(){
 function renderKod(){
   renderYears();
   const set=new Set();rows.forEach(r=>String(r.kod||'').split('/').map(s=>s.trim()).filter(Boolean).forEach(k=>set.add(k)));
-  $('kod').innerHTML=`<option value="">${T('Semua pegawai')}</option>`+[...set].sort().map(k=>`<option ${k===F.kod?'selected':''}>${esc(k)}</option>`).join('');
+  $('kod').innerHTML=`<option value="">${T('Semua kod')}</option>`+[...set].sort().map(k=>`<option ${k===F.kod?'selected':''}>${esc(k)}</option>`).join('');
 }
 function renderRole(){
   $('role').className='role'+(isAdmin?' edit':'');
@@ -806,63 +816,112 @@ async function openFile(f,download,ctx){
 
 /* ---------- Iklan Jawatan library ---------- */
 let iklanQ='';
+const isoToDmy=s=>{const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:String(s||'')};
+function dmyToIso(s){
+  const m=String(s||'').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(!m)return null;
+  const d=+m[1],mo=+m[2],y=+m[3],dt=new Date(Date.UTC(y,mo-1,d));
+  if(dt.getUTCFullYear()!==y||dt.getUTCMonth()!==mo-1||dt.getUTCDate()!==d)return null;
+  return `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+const CAL_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
+function dateField(name,label){
+  return `<label class="f">${label}<span class="datef"><input name="${name}" type="text" inputmode="numeric" placeholder="dd/mm/yyyy" autocomplete="off" maxlength="10"><button type="button" class="calbtn" data-cal="${name}" aria-label="${T('Pilih tarikh')}" title="${T('Pilih tarikh')}">${CAL_SVG}</button><input type="date" class="dpick" data-for="${name}" tabindex="-1" aria-hidden="true"></span></label>`;
+}
+function wireDates(form){
+  form.querySelectorAll('.datef').forEach(w=>{
+    const txt=w.querySelector('input[type=text]'),pick=w.querySelector('.dpick'),btn=w.querySelector('.calbtn');
+    txt.addEventListener('input',e=>{
+      if(e.inputType&&e.inputType.startsWith('delete'))return;
+      let d=txt.value.replace(/[^\d]/g,'').slice(0,8);
+      txt.value=d.length>4?d.slice(0,2)+'/'+d.slice(2,4)+'/'+d.slice(4):d.length>2?d.slice(0,2)+'/'+d.slice(2):d;
+    });
+    btn.onclick=()=>{
+      const iso=dmyToIso(txt.value);pick.value=iso||'';
+      try{pick.showPicker()}catch(e){pick.focus();pick.click()}
+    };
+    pick.onchange=()=>{if(pick.value){txt.value=isoToDmy(pick.value);txt.dispatchEvent(new Event('change'))}};
+  });
+}
 function renderIklan(){
   $('dTitle').textContent=T('Iklan Jawatan');
   $('dSub').textContent=T('Fail PDF iklan jawatan kosong. Semua pengguna boleh membuka dan memuat turun.');
   $('dBody').innerHTML=`
     ${isAdmin?`<section class="pdfsec"><h3>${T('Muat naik iklan baharu')}</h3>
       <form id="ikf" class="grid2" novalidate>
-        <label class="f full">${T('Tajuk iklan')} *<input name="tajuk" type="text" placeholder="${T('cth. Iklan 7A Tahun 2026')}"></label>
-        <label class="f">${T('Rujukan (pilihan)')}<input name="rujukan" type="text" placeholder="${T('cth. 2026/OCT/01/KPDK')}"></label>
-        <label class="f">${T('Tarikh iklan (pilihan)')}<input name="tarikh" type="text" placeholder="${T('cth. 01 Oktober 2026')}"></label>
+        <label class="f full">${T('Bilangan iklan')} *<input name="bilangan" type="text" placeholder="${T('cth. 2026/OCT/01/KPDK')}"></label>
+        <label class="f full">${T('Tajuk iklan (pilihan)')}<input name="tajuk" type="text" placeholder="${T('cth. Iklan 7A Tahun 2026')}"></label>
+        ${dateField('tarikh',T('Tarikh iklan (pilihan)'))}
+        ${dateField('tarikhTutup',T('Tarikh tutup iklan (pilihan)'))}
         <label class="f full">${T('Fail PDF (maksimum 10 MB)')} *<input name="fail" type="file" accept="application/pdf,.pdf"></label>
         <div class="full"><button class="btn primary" type="submit" id="ikUp">${T('Muat naik')}</button></div>
       </form></section>`:''}
     <div class="ihead"><h3>${T('Senarai iklan')}</h3><span class="count" id="ikCount"></span></div>
-    <input class="isearch" id="ikQ" type="search" placeholder="${T('Cari tajuk, rujukan atau nama fail')}" value="${esc(iklanQ)}" aria-label="${T('Cari iklan')}">
+    <input class="isearch" id="ikQ" type="search" placeholder="${T('Cari bilangan, tajuk iklan atau nama fail')}" value="${esc(iklanQ)}" aria-label="${T('Cari iklan')}">
     <div class="ilist" id="ikList"></div>`;
   $('dFoot').hidden=true;$('dFoot').innerHTML='';
   $('ikQ').oninput=e=>{iklanQ=e.target.value;renderIklanList();};
-  if(isAdmin)$('ikf').onsubmit=async e=>{
-    e.preventDefault();if(uploading)return;
-    const fm=e.target,tajuk=fm.tajuk.value.trim(),file=fm.fail.files[0];
-    if(!tajuk){toast(T('Tajuk iklan diperlukan.'));fm.tajuk.focus();return}
-    if(!file){toast(T('Pilih fail PDF.'));return}
-    if(file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name)){toast(T('Sila pilih fail PDF.'));return}
-    if(file.size>PDF_MAX){toast(T('Fail terlalu besar. Had maksimum 10 MB.'));return}
-    uploading=true;const b=$('ikUp');b.disabled=true;b.textContent=T('Memuat naik… {p}%',{p:0});
-    try{
-      const meta=await writeChunks(file,pct=>{if($('ikUp'))$('ikUp').textContent=T('Memuat naik… {p}%',{p:pct})});
-      await setDoc(doc(fdb,'iklan','i'+Date.now().toString(36)),{tajuk,rujukan:fm.rujukan.value.trim(),tarikh:fm.tarikh.value.trim(),fail:meta,createdAt:meta.uploadedAt});
-      audit('upload_iklan',tajuk,{file:file.name});
-      fm.reset();toast(T('Iklan dimuat naik.'));
-    }catch(err){toast(errMsg(err))}
-    finally{uploading=false;if($('ikUp')){$('ikUp').disabled=false;$('ikUp').textContent=T('Muat naik');}}
-  };
+  if(isAdmin){
+    wireDates($('ikf'));
+    $('ikf').onsubmit=async e=>{
+      e.preventDefault();if(uploading)return;
+      const fm=e.target,bilangan=fm.bilangan.value.trim(),file=fm.fail.files[0];
+      if(!bilangan){toast(T('Bilangan iklan diperlukan.'));fm.bilangan.focus();return}
+      const dates={};
+      for(const n of ['tarikh','tarikhTutup']){
+        const v=fm[n].value.trim();
+        if(!v){dates[n]='';continue}
+        const iso=dmyToIso(v);
+        if(!iso){toast(T('Tarikh tidak sah. Gunakan format dd/mm/yyyy.'));fm[n].focus();return}
+        dates[n]=iso;
+      }
+      if(dates.tarikh&&dates.tarikhTutup&&dates.tarikhTutup<dates.tarikh){toast(T('Tarikh tutup tidak boleh lebih awal daripada tarikh iklan.'));fm.tarikhTutup.focus();return}
+      if(!file){toast(T('Pilih fail PDF.'));return}
+      if(file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name)){toast(T('Sila pilih fail PDF.'));return}
+      if(file.size>PDF_MAX){toast(T('Fail terlalu besar. Had maksimum 10 MB.'));return}
+      uploading=true;const b=$('ikUp');b.disabled=true;b.textContent=T('Memuat naik… {p}%',{p:0});
+      try{
+        const meta=await writeChunks(file,pct=>{if($('ikUp'))$('ikUp').textContent=T('Memuat naik… {p}%',{p:pct})});
+        await setDoc(doc(fdb,'iklan','i'+Date.now().toString(36)),{bilangan,tajuk:fm.tajuk.value.trim(),tarikh:dates.tarikh,tarikhTutup:dates.tarikhTutup,fail:meta,createdAt:meta.uploadedAt});
+        audit('upload_iklan',bilangan,{file:file.name});
+        fm.reset();toast(T('Iklan dimuat naik.'));
+      }catch(err){toast(errMsg(err))}
+      finally{uploading=false;if($('ikUp')){$('ikUp').disabled=false;$('ikUp').textContent=T('Muat naik');}}
+    };
+  }
   renderIklanList();
 }
+const ikHead=x=>x.job?(x.job.jawatan||''):(x.bilangan||x.tajuk||'');
 function renderIklanList(){
   const box=$('ikList');if(!box)return;
   const q=iklanQ.trim().toLowerCase();
-  const jobItems=rows.filter(r=>r.iklanPdf&&r.iklanPdf.id).map(r=>({id:'job:'+r.id,job:r,tajuk:r.jawatan||'',rujukan:[r.rujukanIklan,r.jenisIklan].filter(Boolean).join(', '),tarikh:r.jabatan||'',fail:r.iklanPdf,createdAt:r.iklanPdf.uploadedAt||''}));
+  const jobItems=rows.filter(r=>r.iklanPdf&&r.iklanPdf.id).map(r=>({id:'job:'+r.id,job:r,fail:r.iklanPdf,createdAt:r.iklanPdf.uploadedAt||''}));
   const all=[...iklans,...jobItems];
-  const list=all.filter(x=>!q||[x.tajuk,x.rujukan,x.tarikh,x.fail&&x.fail.name].join(' ').toLowerCase().includes(q))
+  const words=x=>x.job?[x.job.jawatan,x.job.jabatan,x.job.rujukanIklan,x.job.jenisIklan]:[x.bilangan,x.tajuk,isoToDmy(x.tarikh),isoToDmy(x.tarikhTutup)];
+  const list=all.filter(x=>!q||[...words(x),x.fail&&x.fail.name].join(' ').toLowerCase().includes(q))
     .sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
   $('ikCount').textContent=all.length?T('{a} daripada {b}',{a:list.length,b:all.length}):'';
   if(!iklanLoaded){box.innerHTML=`<p class="pdfnone">${T('Memuatkan…')}</p>`;return}
   if(!all.length){box.innerHTML=`<p class="pdfnone">${isAdmin?T('Belum ada iklan. Muat naik fail PDF pertama di atas.'):T('Belum ada iklan dimuat naik.')}</p>`;return}
   if(!list.length){box.innerHTML=`<p class="pdfnone">${T('Tiada iklan sepadan dengan carian.')}</p>`;return}
   box.innerHTML=list.map(x=>{
-    const f=x.fail||{};const when=f.uploadedAt?new Date(f.uploadedAt).toLocaleDateString(LOC(),{day:'2-digit',month:'short',year:'numeric'}):'';
-    const sub=[x.rujukan,x.tarikh].filter(Boolean).join(', ');
-    return `<div class="iitem"><div class="pdfcard"><div class="pdfic" aria-hidden="true">PDF</div><div class="pdfmeta">${x.job?`<span class="srctag">${T('Dari rekod jawatan')}</span><br>`:''}<b>${esc(x.tajuk)}</b>${sub?`<span>${esc(sub)}</span><br>`:''}<span class="ifile">${esc(f.name||'')} (${fmtSize(f.size||0)})${when?', '+T('dimuat naik')+' '+esc(when):''}${f.uploadedBy?' '+T('oleh')+' '+esc(f.uploadedBy):''}</span></div></div>
+    const f=x.fail||{};const when=f.uploadedAt?isoToDmy(new Date(f.uploadedAt).toISOString().slice(0,10)):'';
+    let sub,dl;
+    if(x.job){
+      sub=[x.job.rujukanIklan,x.job.jenisIklan,x.job.jabatan].filter(Boolean).join(', ');
+      dl=[x.job.tarikhIklan&&!blank(x.job.tarikhIklan)?T('Tarikh iklan')+': '+x.job.tarikhIklan:'',x.job.tarikhTutup&&!blank(x.job.tarikhTutup)?T('Tarikh tutup')+': '+x.job.tarikhTutup:''].filter(Boolean).join(' · ');
+    }else{
+      sub=x.bilangan?(x.tajuk||''):'';
+      dl=[x.tarikh?T('Tarikh iklan')+': '+isoToDmy(x.tarikh):'',x.tarikhTutup?T('Tarikh tutup')+': '+isoToDmy(x.tarikhTutup):''].filter(Boolean).join(' · ');
+    }
+    return `<div class="iitem"><div class="pdfcard"><div class="pdfic" aria-hidden="true">PDF</div><div class="pdfmeta">${x.job?`<span class="srctag">${T('Dari rekod jawatan')}</span><br>`:''}<b>${esc(ikHead(x))}</b>${sub?`<span>${esc(sub)}</span><br>`:''}${dl?`<span class="idates">${esc(dl)}</span><br>`:''}<span class="ifile">${esc(f.name||'')} (${fmtSize(f.size||0)})${when?', '+T('dimuat naik')+' '+esc(when):''}${f.uploadedBy?' '+T('oleh')+' '+esc(f.uploadedBy):''}</span></div></div>
       <div class="pdfact"><button class="btn" data-ik-open="${esc(x.id)}">${T('Buka')}</button><button class="btn" data-ik-dl="${esc(x.id)}">${T('Muat turun')}</button>${x.job?`<button class="btn" data-ik-job="${esc(x.job.id)}">${T('Lihat jawatan')}</button>`:(isAdmin?`<button class="linkbtn" data-ik-del="${esc(x.id)}">${T('Buang')}</button>`:'')}</div></div>`;
   }).join('');
   const byId=id=>list.find(x=>x.id===id);
+  const ctx=x=>x?(x.job?jobName(x.job):'Iklan: '+ikHead(x)):'';
   box.querySelectorAll('[data-ik-job]').forEach(b=>b.onclick=()=>openDrawer(b.dataset.ikJob));
-  box.querySelectorAll('[data-ik-open]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikOpen);openFile(x?.fail,false,x?(x.job?jobName(x.job):'Iklan: '+x.tajuk):'')});
-  box.querySelectorAll('[data-ik-dl]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikDl);openFile(x?.fail,true,x?(x.job?jobName(x.job):'Iklan: '+x.tajuk):'')});
-  box.querySelectorAll('[data-ik-del]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikDel);if(!x)return;ask(T('Buang iklan ini?'),T('“{n}” akan dibuang untuk semua pengguna.',{n:x.tajuk}),async()=>{try{await deleteDoc(doc(fdb,'iklan',x.id));audit('remove_iklan',x.tajuk,{file:x.fail&&x.fail.name||''});delChunks(x.fail).catch(()=>{});toast(T('Iklan dibuang.'))}catch(e){toast(errMsg(e))}})});
+  box.querySelectorAll('[data-ik-open]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikOpen);openFile(x?.fail,false,ctx(x))});
+  box.querySelectorAll('[data-ik-dl]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikDl);openFile(x?.fail,true,ctx(x))});
+  box.querySelectorAll('[data-ik-del]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikDel);if(!x)return;ask(T('Buang iklan ini?'),T('“{n}” akan dibuang untuk semua pengguna.',{n:ikHead(x)}),async()=>{try{await deleteDoc(doc(fdb,'iklan',x.id));audit('remove_iklan',ikHead(x),{file:x.fail&&x.fail.name||''});delChunks(x.fail).catch(()=>{});toast(T('Iklan dibuang.'))}catch(e){toast(errMsg(e))}})});
 }
 function watchIklan(){
   if(unsubIklan)return;
