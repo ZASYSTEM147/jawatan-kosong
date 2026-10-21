@@ -624,6 +624,52 @@ td{padding-top:16px;padding-bottom:16px}
 .edit-wizard .ew-actions{display:flex;gap:8px;justify-content:space-between;margin-top:18px}\n.edit-wizard .ew-form{display:grid;gap:12px}\n@media(max-width:480px){.edit-wizard{padding:10px}.edit-wizard .ew-box{padding:15px;max-height:92vh;overflow:auto}.edit-wizard .ew-form{gap:10px}.edit-wizard input{min-height:42px}}
 .edit-wizard .ew-actions .right{display:flex;gap:8px;margin-left:auto}
 
+
+/* Balance the ministry logo with the full title and contact block */
+.top .top-heading{
+  display:flex !important;
+  align-items:center !important;
+  gap:20px !important;
+}
+.top .top-heading > .logo{
+  height:112px !important;
+  width:230px !important;
+  max-width:32% !important;
+  max-height:none !important;
+  object-fit:contain !important;
+  flex:0 0 auto !important;
+}
+.top .top-heading .brand{
+  flex:1 1 auto !important;
+  min-width:0 !important;
+}
+.top .top-heading .brand .title{
+  margin-top:0 !important;
+}
+@media(max-width:700px){
+  .top .top-heading{gap:12px !important;align-items:center !important}
+  .top .top-heading > .logo{
+    width:clamp(90px,28vw,150px) !important;
+    height:76px !important;
+    max-width:32% !important;
+    max-height:76px !important;
+  }
+  .top .top-heading .brand .title{
+    font-size:clamp(18px,4.6vw,25px) !important;
+  }
+  .top .top-heading .brand .subtitle{
+    font-size:clamp(10px,2.7vw,12px) !important;
+    line-height:1.3 !important;
+    overflow-wrap:anywhere;
+  }
+}
+@media(max-width:420px){
+  .top .top-heading{gap:8px !important}
+  .top .top-heading > .logo{
+    width:84px !important;height:62px !important;max-width:28% !important;max-height:62px !important;
+  }
+}
+
 </style>
 
 <style id="blue-login-card">
@@ -721,7 +767,7 @@ td{padding-top:16px;padding-bottom:16px}
       <div class="brand">
         <h1 class="title" data-i18n="Proses Jawatan Kosong">Proses Jawatan Kosong</h1>
         <p class="subtitle" >Urus Setia Pengambilan Kementerian<br>Unit Pengurusan Sumber Manusia<br>Bahagian Sumber Manusia<br>Jabatan Pentadbiran dan Perkhidmatan-Perkhidmatan<br>Kementerian Pendidikan<br>Telephone / Whatsapp : +673 2380450</p>
-        <p class="subtitle" data-i18n="Jabatan Pentadbiran dan Perkhidmatan-Perkhidmatan, Kementerian Pendidikan">Jabatan Pentadbiran dan Perkhidmatan-Perkhidmatan, Kementerian Pendidikan</p>
+        
         <p class="subtitle short" data-i18n="Unit Pengurusan Sumber Manusia">Unit Pengurusan Sumber Manusia</p>
       </div>
     </div>
