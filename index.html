@@ -224,14 +224,25 @@ label.f textarea{min-height:76px;resize:vertical;line-height:1.45}
 .pdfmeta span{font-size:12.5px;color:var(--muted)}
 .pdfact{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .pdfnone{margin:0 0 10px;color:var(--muted);font-size:14px}
+.ilist{display:flex;flex-direction:column;gap:10px}
+.iitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.iitem .pdfcard{margin-bottom:10px}
+.ihead{display:flex;align-items:center;gap:10px;margin:0 0 12px;flex-wrap:wrap}
+.ihead h3{margin:0;font-size:15px;flex:1}
+.isearch{width:100%;margin:0 0 12px;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:9px 12px;min-height:40px}
+.ifile{font-size:13px;color:var(--muted);word-break:break-all}
 .pdftag{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:800;padding:1px 5px;border-radius:4px;background:#C62828;color:#fff;vertical-align:1px}
 .card .logo{height:76px;margin:0 auto 8px}
 .card .ministry{margin:0 0 18px;font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
 .card .org{margin:2px 0 20px;color:var(--muted);font-size:13px;line-height:1.45}
 .brand .subtitle.short{display:none}
 @media (max-width:820px){.logo{height:38px}.brand .subtitle{display:none}.brand .subtitle.short{display:block}}
-.tools .search{flex:1 1 200px}
-.tools #exportBtn{margin-left:auto}
+.tools .search{flex:1 1 150px}
+.tools{gap:8px}
+.tools select{padding-left:10px}
+.tools #tahun{width:168px}.tools #kod{width:182px}.tools #sort{width:178px}
+@media (max-width:820px){.tools #tahun,.tools #kod,.tools #sort{width:auto;flex:1 1 140px}}
+.tools #iklanBtn{margin-left:auto}
 .listmeta{display:flex;align-items:center;gap:12px;margin:-2px 0 10px;min-height:22px}
 .listmeta .count{margin-left:0}
 [hidden]{display:none!important}
@@ -338,17 +349,20 @@ label.f textarea{min-height:76px;resize:vertical;line-height:1.45}
   <section class="tools" aria-label="Carian dan tapisan">
     <label class="search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-      <input id="q" type="search" placeholder="Cari jawatan, jabatan, rujukan atau nama calon" aria-label="Cari">
+      <input id="q" type="search" placeholder="Cari…" aria-label="Cari">
     </label>
     <select id="tahun" aria-label="Tahun"><option value="">Semua tahun</option></select>
     <select id="kod" aria-label="Pegawai bertugas"><option value="">Semua pegawai</option></select>
     <select id="sort" aria-label="Susun">
       <option value="bil">Susun ikut bil.</option>
-      <option value="baru">Iklan terbaru dahulu</option>
-      <option value="lama">Iklan terawal dahulu</option>
+      <option value="baru">Iklan terbaru</option>
+      <option value="lama">Iklan terawal</option>
       <option value="peringkat">Ikut peringkat</option>
       <option value="kosong">Kekosongan terbanyak</option>
     </select>
+    <button class="btn" id="iklanBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>Iklan Jawatan
+    </button>
     <button class="btn" id="exportBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>Excel
     </button>
@@ -432,8 +446,8 @@ const blank=v=>{const t=String(v??'').trim();return !t||t==='-'||t==='—'||t.to
 const show=id=>['sSetup','sLogin','sDenied','sApp'].forEach(s=>$(s).hidden=s!==id);
 
 let fdb=null,auth=null,me=null,isAdmin=false;
-let rows=[],users=[],loaded=false;
-let unsubRows=null,unsubUsers=null;
+let rows=[],users=[],iklans=[],loaded=false,iklanLoaded=false;
+let unsubRows=null,unsubUsers=null,unsubIklan=null;
 const F={stage:'',q:'',kod:'',tahun:'',sort:'bil'};
 let openId=null,mode='view';
 
@@ -503,6 +517,7 @@ function closeDrawer(){const was=openId;openId=null;mode='view';$('drawer').clas
 
 function renderDrawer(){
   if(mode==='users')return renderUsers();
+  if(mode==='iklan')return renderIklan();
   if(mode==='new')return renderForm(null);
   const r=rows.find(x=>x.id===openId);
   if(!r){closeDrawer();return}
@@ -599,23 +614,28 @@ async function uploadPdf(r,file){
   const setP=t=>{const b=$('pdfUp');if(b){b.disabled=true;b.textContent=t}};
   setP('Memuat naik… 0%');
   try{
-    const b64=toB64(new Uint8Array(await file.arrayBuffer()));
-    const n=Math.max(1,Math.ceil(b64.length/PDF_CHUNK));
-    const id='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-    for(let i=0;i<n;i++){
-      await setDoc(doc(fdb,'pdf',id,'bahagian',pad(i)),{i,data:b64.slice(i*PDF_CHUNK,(i+1)*PDF_CHUNK)});
-      setP(`Memuat naik… ${Math.round((i+1)/n*100)}%`);
-    }
+    const meta=await writeChunks(file,pct=>setP(`Memuat naik… ${pct}%`));
     const old=r.iklanPdf;
-    await setDoc(doc(fdb,'jawatan',r.id),{iklanPdf:{id,name:file.name,size:file.size,chunks:n,uploadedAt:new Date().toISOString(),uploadedBy:me.displayName||me.email}},{merge:true});
+    await setDoc(doc(fdb,'jawatan',r.id),{iklanPdf:meta},{merge:true});
     if(old&&old.id)delChunks(old).catch(()=>{});
     toast('Fail iklan dimuat naik.');
   }catch(e){toast(errMsg(e));if(openId===r.id&&mode==='view')renderDrawer();}
   finally{uploading=false;}
 }
+async function writeChunks(file,onPct){
+  const b64=toB64(new Uint8Array(await file.arrayBuffer()));
+  const n=Math.max(1,Math.ceil(b64.length/PDF_CHUNK));
+  const id='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  for(let i=0;i<n;i++){
+    await setDoc(doc(fdb,'pdf',id,'bahagian',pad(i)),{i,data:b64.slice(i*PDF_CHUNK,(i+1)*PDF_CHUNK)});
+    if(onPct)onPct(Math.round((i+1)/n*100));
+  }
+  return {id,name:file.name,size:file.size,chunks:n,uploadedAt:new Date().toISOString(),uploadedBy:me.displayName||me.email};
+}
 const pdfCache={};
-async function openPdf(r,download){
-  const f=r.iklanPdf;if(!f||!f.id)return;
+const openPdf=(r,download)=>openFile(r.iklanPdf,download);
+async function openFile(f,download){
+  if(!f||!f.id)return;
   const w=download?null:window.open('','_blank');
   try{
     let blob=pdfCache[f.id];
@@ -631,6 +651,67 @@ async function openPdf(r,download){
     else{const a=document.createElement('a');a.href=url;a.download=f.name||'iklan.pdf';document.body.appendChild(a);a.click();a.remove();}
     setTimeout(()=>URL.revokeObjectURL(url),120000);
   }catch(e){if(w)w.close();toast(e&&e.code?errMsg(e):'Fail tidak dapat dibuka. Cuba lagi.');}
+}
+
+/* ---------- Iklan Jawatan library ---------- */
+let iklanQ='';
+function renderIklan(){
+  $('dTitle').textContent='Iklan Jawatan';
+  $('dSub').textContent='Fail PDF iklan jawatan kosong. Semua pengguna boleh membuka dan memuat turun.';
+  $('dBody').innerHTML=`
+    ${isAdmin?`<section class="pdfsec"><h3>Muat naik iklan baharu</h3>
+      <form id="ikf" class="grid2" novalidate>
+        <label class="f full">Tajuk iklan *<input name="tajuk" type="text" placeholder="cth. Iklan 7A Tahun 2026"></label>
+        <label class="f">Rujukan (pilihan)<input name="rujukan" type="text" placeholder="cth. 2026/OCT/01/KPDK"></label>
+        <label class="f">Tarikh iklan (pilihan)<input name="tarikh" type="text" placeholder="cth. 01 Oktober 2026"></label>
+        <label class="f full">Fail PDF (maksimum 10 MB) *<input name="fail" type="file" accept="application/pdf,.pdf"></label>
+        <div class="full"><button class="btn primary" type="submit" id="ikUp">Muat naik</button></div>
+      </form></section>`:''}
+    <div class="ihead"><h3>Senarai iklan</h3><span class="count" id="ikCount"></span></div>
+    <input class="isearch" id="ikQ" type="search" placeholder="Cari tajuk, rujukan atau nama fail" value="${esc(iklanQ)}" aria-label="Cari iklan">
+    <div class="ilist" id="ikList"></div>`;
+  $('dFoot').hidden=true;$('dFoot').innerHTML='';
+  $('ikQ').oninput=e=>{iklanQ=e.target.value;renderIklanList();};
+  if(isAdmin)$('ikf').onsubmit=async e=>{
+    e.preventDefault();if(uploading)return;
+    const fm=e.target,tajuk=fm.tajuk.value.trim(),file=fm.fail.files[0];
+    if(!tajuk){toast('Tajuk iklan diperlukan.');fm.tajuk.focus();return}
+    if(!file){toast('Pilih fail PDF.');return}
+    if(file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name)){toast('Sila pilih fail PDF.');return}
+    if(file.size>PDF_MAX){toast('Fail terlalu besar. Had maksimum 10 MB.');return}
+    uploading=true;const b=$('ikUp');b.disabled=true;b.textContent='Memuat naik… 0%';
+    try{
+      const meta=await writeChunks(file,pct=>{if($('ikUp'))$('ikUp').textContent=`Memuat naik… ${pct}%`});
+      await setDoc(doc(fdb,'iklan','i'+Date.now().toString(36)),{tajuk,rujukan:fm.rujukan.value.trim(),tarikh:fm.tarikh.value.trim(),fail:meta,createdAt:meta.uploadedAt});
+      fm.reset();toast('Iklan dimuat naik.');
+    }catch(err){toast(errMsg(err))}
+    finally{uploading=false;if($('ikUp')){$('ikUp').disabled=false;$('ikUp').textContent='Muat naik';}}
+  };
+  renderIklanList();
+}
+function renderIklanList(){
+  const box=$('ikList');if(!box)return;
+  const q=iklanQ.trim().toLowerCase();
+  const list=iklans.filter(x=>!q||[x.tajuk,x.rujukan,x.tarikh,x.fail&&x.fail.name].join(' ').toLowerCase().includes(q))
+    .sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+  $('ikCount').textContent=iklans.length?`${list.length} daripada ${iklans.length}`:'';
+  if(!iklanLoaded){box.innerHTML='<p class="pdfnone">Memuatkan…</p>';return}
+  if(!iklans.length){box.innerHTML=`<p class="pdfnone">${isAdmin?'Belum ada iklan. Muat naik fail PDF pertama di atas.':'Belum ada iklan dimuat naik.'}</p>`;return}
+  if(!list.length){box.innerHTML='<p class="pdfnone">Tiada iklan sepadan dengan carian.</p>';return}
+  box.innerHTML=list.map(x=>{
+    const f=x.fail||{};const when=f.uploadedAt?new Date(f.uploadedAt).toLocaleDateString('ms-BN',{day:'2-digit',month:'short',year:'numeric'}):'';
+    const sub=[x.rujukan,x.tarikh].filter(Boolean).join(', ');
+    return `<div class="iitem"><div class="pdfcard"><div class="pdfic" aria-hidden="true">PDF</div><div class="pdfmeta"><b>${esc(x.tajuk)}</b>${sub?`<span>${esc(sub)}</span><br>`:''}<span class="ifile">${esc(f.name||'')} (${fmtSize(f.size||0)})${when?', dimuat naik '+esc(when):''}${f.uploadedBy?' oleh '+esc(f.uploadedBy):''}</span></div></div>
+      <div class="pdfact"><button class="btn" data-ik-open="${esc(x.id)}">Buka</button><button class="btn" data-ik-dl="${esc(x.id)}">Muat turun</button>${isAdmin?`<button class="linkbtn" data-ik-del="${esc(x.id)}">Buang</button>`:''}</div></div>`;
+  }).join('');
+  const byId=id=>iklans.find(x=>x.id===id);
+  box.querySelectorAll('[data-ik-open]').forEach(b=>b.onclick=()=>openFile(byId(b.dataset.ikOpen)?.fail,false));
+  box.querySelectorAll('[data-ik-dl]').forEach(b=>b.onclick=()=>openFile(byId(b.dataset.ikDl)?.fail,true));
+  box.querySelectorAll('[data-ik-del]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikDel);if(!x)return;ask('Buang iklan ini?',`“${x.tajuk}” akan dibuang untuk semua pengguna.`,async()=>{try{await deleteDoc(doc(fdb,'iklan',x.id));delChunks(x.fail).catch(()=>{});toast('Iklan dibuang.')}catch(e){toast(errMsg(e))}})});
+}
+function watchIklan(){
+  if(unsubIklan)return;
+  unsubIklan=onSnapshot(collection(fdb,'iklan'),s=>{iklans=s.docs.map(d=>({id:d.id,...d.data()}));iklanLoaded=true;if(mode==='iklan')renderIklanList();},()=>{iklanLoaded=true;if(mode==='iklan')renderIklanList();});
 }
 
 /* ---------- users (admin) ---------- */
@@ -782,6 +863,7 @@ $('close').onclick=closeDrawer;$('scrim').onclick=closeDrawer;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('confirm').classList.contains('open'))$('cNo').click();else if($('drawer').classList.contains('open'))closeDrawer();}});
 $('addBtn').onclick=()=>openDrawer(null,'new');
 $('usersBtn').onclick=()=>openDrawer(null,'users');
+$('iklanBtn').onclick=()=>openDrawer(null,'iklan');
 $('exportBtn').onclick=exportExcel;
 $('logoutBtn').onclick=()=>signOut(auth);
 $('deniedOut').onclick=()=>signOut(auth);
@@ -804,6 +886,8 @@ else{
   onAuthStateChanged(auth,async u=>{
     if(unsubRows){unsubRows();unsubRows=null}
     if(unsubUsers){unsubUsers();unsubUsers=null}
+    if(unsubIklan){unsubIklan();unsubIklan=null}
+    iklans=[];iklanLoaded=false;
     rows=[];users=[];loaded=false;closeDrawer();
     if(!u){me=null;show('sLogin');return}
     me=u;const email=(u.email||'').toLowerCase();
@@ -818,6 +902,7 @@ else{
     show('sApp');renderAll();
     unsubRows=onSnapshot(collection(fdb,'jawatan'),s=>{rows=s.docs.map(d=>({id:d.id,...d.data()}));loaded=true;$('notice').innerHTML='';renderAll();},
       e=>{$('notice').innerHTML=`<p class="notice">${e.code==='permission-denied'?'Akses anda telah ditarik balik. Log keluar dan hubungi admin.':'Sambungan ke data terputus. Muat semula halaman.'}</p>`});
+    watchIklan();
     if(isAdmin)watchUsers();
   });
 }
