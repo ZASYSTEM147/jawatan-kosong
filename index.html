@@ -1282,5 +1282,33 @@ else{
   });
 }
 </script>
+
+<script>
+/* Startup guard: show a helpful message instead of leaving GitHub Pages blank
+   if the Firebase module fails to load or initialise. */
+(function () {
+  window.setTimeout(function () {
+    var ids = ["sSetup", "sLogin", "sDenied", "sApp"];
+    var anyVisible = ids.some(function (id) {
+      var el = document.getElementById(id);
+      return el && !el.hidden;
+    });
+    if (anyVisible) return;
+    var gate = document.getElementById("sLogin");
+    if (gate) {
+      gate.hidden = false;
+      var p = gate.querySelector(".small");
+      if (!p) {
+        p = document.createElement("p");
+        p.className = "small";
+        gate.querySelector(".card").appendChild(p);
+      }
+      p.hidden = false;
+      p.textContent = "Aplikasi gagal dimulakan. Sila semak sambungan internet dan Firebase, kemudian muat semula halaman. / The app could not start. Check your internet connection and Firebase setup, then reload.";
+    }
+  }, 7000);
+})();
+</script>
+
 </body>
 </html>
