@@ -1186,7 +1186,7 @@ function renderDrawer(){
   });
   html+='</ol>';
   if(!blank(r.catatan))html+=`<div class="sub" style="margin-top:4px;color:var(--muted);font-size:13px">${T('Catatan')}</div><div class="block">${esc(r.catatan)}</div>`;
-  if(r.updatedAt){const w=new Date(r.updatedAt);html+=`<div class="meta">${T('Dikemas kini')} ${esc(w.toLocaleDateString(LOC(),{day:'2-digit',month:'long',year:'numeric'}))}, ${esc(w.toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'}))}${r.updatedBy?' '+T('oleh')+' '+esc(r.updatedBy):''}</div>`;}
+  if(isAdmin&&r.updatedAt){const w=new Date(r.updatedAt);html+=`<div class="meta">${T('Dikemas kini')} ${esc(w.toLocaleDateString(LOC(),{day:'2-digit',month:'long',year:'numeric'}))}, ${esc(w.toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'}))}${r.updatedBy?' '+T('oleh')+' '+esc(r.updatedBy):''}</div>`;}
   $('dBody').innerHTML=html;
   wirePdf(r);
   $('dFoot').hidden=!isAdmin;
