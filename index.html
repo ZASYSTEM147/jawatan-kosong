@@ -215,6 +215,16 @@ label.f textarea{min-height:76px;resize:vertical;line-height:1.45}
 .brand{min-width:0;flex:0 1 auto;max-width:520px}
 .brand .subtitle{font-size:12.5px;line-height:1.35}
 .card{text-align:center}
+.pdfsec{margin:0 0 22px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+.pdfsec h3{margin:0 0 10px;font-size:14px}
+.pdfcard{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.pdfic{width:38px;height:46px;border-radius:6px;background:#C62828;color:#fff;font-weight:800;font-size:11px;display:grid;place-items:center;flex:none}
+.pdfmeta{min-width:0}
+.pdfmeta b{display:block;font-size:14px;word-break:break-word}
+.pdfmeta span{font-size:12.5px;color:var(--muted)}
+.pdfact{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pdfnone{margin:0 0 10px;color:var(--muted);font-size:14px}
+.pdftag{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:800;padding:1px 5px;border-radius:4px;background:#C62828;color:#fff;vertical-align:1px}
 .card .logo{height:76px;margin:0 auto 8px}
 .card .ministry{margin:0 0 18px;font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
 .card .org{margin:2px 0 20px;color:var(--muted);font-size:13px;line-height:1.45}
@@ -402,7 +412,7 @@ const OWNER_EMAIL = "za.system.147@gmail.com";
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, setDoc, deleteDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, deleteField, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const STAGES=[
   {k:'IKLAN',l:'Iklan',fields:[['tarikhIklan','Tarikh iklan'],['tarikhTutup','Tarikh tutup iklan']]},
@@ -461,7 +471,7 @@ const trackHtml=r=>{const idx=stageIdx(r),done=r.status==='SELESAI';return `<div
 const pillHtml=r=>{const s=STAGES[stageIdx(r)];return `<span class="pill ${r.status==='SELESAI'?'ok':''}">${esc(s?s.l:r.status)}</span>`};
 function renderRows(){
   const list=filtered();
-  $('rows').innerHTML=list.map(r=>`<tr tabindex="0" data-id="${esc(r.id)}"><td class="c-bil">${esc(r.bil)}</td><td class="c-job"><div class="job">${esc(r.jawatan)}</div><div class="dept">${esc(r.jabatan)}</div><div class="ref">${esc([r.rujukanIklan,r.jenisIklan].filter(Boolean).join(', '))}</div></td><td class="c-gaji">${esc(r.tanggaGaji)}</td><td class="c-num">${esc(r.kekosongan)}</td><td class="c-prog">${trackHtml(r)}${pillHtml(r)}</td><td class="c-kod">${r.kod?`<span class="kod">${esc(r.kod)}</span>`:''}</td></tr>`).join('');
+  $('rows').innerHTML=list.map(r=>`<tr tabindex="0" data-id="${esc(r.id)}"><td class="c-bil">${esc(r.bil)}</td><td class="c-job"><div class="job">${esc(r.jawatan)}</div><div class="dept">${esc(r.jabatan)}</div><div class="ref">${esc([r.rujukanIklan,r.jenisIklan].filter(Boolean).join(', '))}${r.iklanPdf&&r.iklanPdf.id?'<span class="pdftag" title="Ada fail iklan">PDF</span>':''}</div></td><td class="c-gaji">${esc(r.tanggaGaji)}</td><td class="c-num">${esc(r.kekosongan)}</td><td class="c-prog">${trackHtml(r)}${pillHtml(r)}</td><td class="c-kod">${r.kod?`<span class="kod">${esc(r.kod)}</span>`:''}</td></tr>`).join('');
   const em=$('empty');
   if(!loaded){em.hidden=false;em.innerHTML='<strong>Memuatkan…</strong>';}
   else if(!rows.length){em.hidden=false;em.innerHTML=isAdmin?'<strong>Belum ada jawatan.</strong>Tekan “Tambah jawatan”, atau import data awal melalui butang “Pengguna”.':'<strong>Belum ada jawatan.</strong>Rekod akan dipaparkan di sini setelah dimasukkan oleh admin.';}
@@ -500,7 +510,7 @@ function renderDrawer(){
   $('dTitle').textContent=r.jawatan||'(Tanpa nama)';$('dSub').textContent=r.jabatan||'';
   const idx=stageIdx(r),done=r.status==='SELESAI';
   const facts=[['Peringkat semasa',STAGES[idx]?.l||r.status],['Kekosongan',r.kekosongan],['Tangga gaji',r.tanggaGaji],['Pegawai bertugas',r.kod],['Rujukan iklan',r.rujukanIklan],['Jenis iklan',r.jenisIklan]];
-  let html=`<dl class="facts">${facts.map(([k,v])=>`<div><dt>${k}</dt><dd>${blank(v)?'—':esc(v)}</dd></div>`).join('')}</dl><ol class="tl">`;
+  let html=`<dl class="facts">${facts.map(([k,v])=>`<div><dt>${k}</dt><dd>${blank(v)?'—':esc(v)}</dd></div>`).join('')}</dl>${pdfSection(r)}<ol class="tl">`;
   STAGES.forEach((s,i)=>{
     const cls=done||i<idx?'d':i===idx?'c':'';let body='';
     if(s.k==='SELESAI')body=blank(r.lantikan)?`<div class="val none">${done?'Tiada butiran lantikan':'Belum selesai'}</div>`:`<div class="sub">Lantikan / keputusan</div><div class="block">${esc(r.lantikan)}</div>`;
@@ -511,9 +521,10 @@ function renderDrawer(){
   if(!blank(r.catatan))html+=`<div class="sub" style="margin-top:4px;color:var(--muted);font-size:13px">Catatan</div><div class="block">${esc(r.catatan)}</div>`;
   if(r.updatedAt){const w=new Date(r.updatedAt);html+=`<div class="meta">Dikemas kini ${esc(w.toLocaleDateString('ms-BN',{day:'2-digit',month:'long',year:'numeric'}))}, ${esc(w.toLocaleTimeString('ms-BN',{hour:'2-digit',minute:'2-digit'}))}${r.updatedBy?' oleh '+esc(r.updatedBy):''}</div>`;}
   $('dBody').innerHTML=html;
+  wirePdf(r);
   $('dFoot').hidden=!isAdmin;
   $('dFoot').innerHTML=isAdmin?`<button class="btn primary" id="editBtn">Edit maklumat</button><span class="spacer"></span><button class="btn danger" id="delBtn">Padam</button>`:'';
-  if(isAdmin){$('editBtn').onclick=()=>{mode='edit';renderDrawer()};$('delBtn').onclick=()=>ask('Padam jawatan ini?',`“${r.jawatan}${r.jabatan?', '+r.jabatan:''}” akan dibuang untuk semua pengguna.`,async()=>{try{await deleteDoc(doc(fdb,'jawatan',r.id));closeDrawer();toast('Jawatan dipadam.')}catch(e){toast(errMsg(e))}});}
+  if(isAdmin){$('editBtn').onclick=()=>{mode='edit';renderDrawer()};$('delBtn').onclick=()=>ask('Padam jawatan ini?',`“${r.jawatan}${r.jabatan?', '+r.jabatan:''}” akan dibuang untuk semua pengguna.`,async()=>{try{await deleteDoc(doc(fdb,'jawatan',r.id));if(r.iklanPdf&&r.iklanPdf.id)delChunks(r.iklanPdf).catch(()=>{});closeDrawer();toast('Jawatan dipadam.')}catch(e){toast(errMsg(e))}});}
 }
 
 const FORM=[
@@ -550,8 +561,76 @@ async function save(r){
   data.updatedAt=new Date().toISOString();
   data.updatedBy=me.displayName||me.email;
   const btn=$('saveBtn');btn.disabled=true;btn.textContent='Menyimpan…';
-  try{await setDoc(doc(fdb,'jawatan',id),data);toast(isNew?'Jawatan ditambah.':'Perubahan disimpan.');openId=id;mode='view';renderDrawer();}
+  try{await setDoc(doc(fdb,'jawatan',id),data,{merge:true});toast(isNew?'Jawatan ditambah.':'Perubahan disimpan.');openId=id;mode='view';renderDrawer();}
   catch(e){btn.disabled=false;btn.textContent=isNew?'Tambah jawatan':'Simpan perubahan';toast(errMsg(e));}
+}
+
+/* ---------- iklan PDF (stored in Firestore in pieces) ---------- */
+const PDF_MAX=10*1024*1024, PDF_CHUNK=900000;
+const pad=i=>String(i).padStart(3,'0');
+const fmtSize=n=>n>=1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB';
+function toB64(u8){let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));return btoa(s);}
+function fromB64(b64){const s=atob(b64),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u;}
+function pdfSection(r){
+  const f=r.iklanPdf;let inner;
+  if(f&&f.id){
+    const when=f.uploadedAt?new Date(f.uploadedAt).toLocaleDateString('ms-BN',{day:'2-digit',month:'short',year:'numeric'}):'';
+    inner=`<div class="pdfcard"><div class="pdfic" aria-hidden="true">PDF</div><div class="pdfmeta"><b>${esc(f.name)}</b><span>${fmtSize(f.size||0)}${when?', dimuat naik '+esc(when):''}${f.uploadedBy?' oleh '+esc(f.uploadedBy):''}</span></div></div>
+      <div class="pdfact"><button class="btn" id="pdfOpen">Buka</button><button class="btn" id="pdfDl">Muat turun</button>${isAdmin?'<button class="btn" id="pdfUp">Tukar fail</button><button class="linkbtn" id="pdfDel">Buang</button>':''}</div>`;
+  }else inner=isAdmin?'<p class="pdfnone">Belum ada fail iklan.</p><button class="btn primary" id="pdfUp">Muat naik PDF</button>':'<p class="pdfnone">Belum ada fail iklan dimuat naik.</p>';
+  return `<section class="pdfsec"><h3>Iklan jawatan (PDF)</h3>${inner}<input type="file" id="pdfFile" accept="application/pdf,.pdf" hidden></section>`;
+}
+function wirePdf(r){
+  const up=$('pdfUp');
+  if(up){up.onclick=()=>$('pdfFile').click();$('pdfFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)uploadPdf(r,f);};}
+  if($('pdfOpen'))$('pdfOpen').onclick=()=>openPdf(r,false);
+  if($('pdfDl'))$('pdfDl').onclick=()=>openPdf(r,true);
+  if($('pdfDel'))$('pdfDel').onclick=()=>ask('Buang fail iklan?',`“${r.iklanPdf.name}” akan dibuang untuk semua pengguna.`,async()=>{
+    try{const old=r.iklanPdf;await setDoc(doc(fdb,'jawatan',r.id),{iklanPdf:deleteField()},{merge:true});delChunks(old).catch(()=>{});toast('Fail iklan dibuang.');}catch(e){toast(errMsg(e))}
+  });
+}
+async function delChunks(f){if(!f||!f.id)return;for(let i=0;i<(f.chunks||0);i++)await deleteDoc(doc(fdb,'pdf',f.id,'bahagian',pad(i)));}
+let uploading=false;
+async function uploadPdf(r,file){
+  if(uploading)return;
+  if(file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name)){toast('Sila pilih fail PDF.');return}
+  if(file.size>PDF_MAX){toast('Fail terlalu besar. Had maksimum 10 MB.');return}
+  uploading=true;
+  const setP=t=>{const b=$('pdfUp');if(b){b.disabled=true;b.textContent=t}};
+  setP('Memuat naik… 0%');
+  try{
+    const b64=toB64(new Uint8Array(await file.arrayBuffer()));
+    const n=Math.max(1,Math.ceil(b64.length/PDF_CHUNK));
+    const id='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    for(let i=0;i<n;i++){
+      await setDoc(doc(fdb,'pdf',id,'bahagian',pad(i)),{i,data:b64.slice(i*PDF_CHUNK,(i+1)*PDF_CHUNK)});
+      setP(`Memuat naik… ${Math.round((i+1)/n*100)}%`);
+    }
+    const old=r.iklanPdf;
+    await setDoc(doc(fdb,'jawatan',r.id),{iklanPdf:{id,name:file.name,size:file.size,chunks:n,uploadedAt:new Date().toISOString(),uploadedBy:me.displayName||me.email}},{merge:true});
+    if(old&&old.id)delChunks(old).catch(()=>{});
+    toast('Fail iklan dimuat naik.');
+  }catch(e){toast(errMsg(e));if(openId===r.id&&mode==='view')renderDrawer();}
+  finally{uploading=false;}
+}
+const pdfCache={};
+async function openPdf(r,download){
+  const f=r.iklanPdf;if(!f||!f.id)return;
+  const w=download?null:window.open('','_blank');
+  try{
+    let blob=pdfCache[f.id];
+    if(!blob){
+      toast('Memuatkan fail…');
+      const s=await getDocs(collection(fdb,'pdf',f.id,'bahagian'));
+      const b64=s.docs.slice().sort((a,b)=>a.id.localeCompare(b.id)).map(d=>d.data().data||'').join('');
+      if(!b64)throw new Error('empty');
+      blob=new Blob([fromB64(b64)],{type:'application/pdf'});pdfCache[f.id]=blob;
+    }
+    const url=URL.createObjectURL(blob);
+    if(w){w.location.href=url;}
+    else{const a=document.createElement('a');a.href=url;a.download=f.name||'iklan.pdf';document.body.appendChild(a);a.click();a.remove();}
+    setTimeout(()=>URL.revokeObjectURL(url),120000);
+  }catch(e){if(w)w.close();toast(e&&e.code?errMsg(e):'Fail tidak dapat dibuka. Cuba lagi.');}
 }
 
 /* ---------- users (admin) ---------- */
