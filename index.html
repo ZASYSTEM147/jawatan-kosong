@@ -741,7 +741,8 @@ function renderAppointments(){
 }
 function renderDrawer(){
   if(mode==='users')return renderUsers();
-  if(mode==='iklan')return renderIklan();\n  if(mode==='appointments')return renderAppointments();
+  if(mode==='iklan')return renderIklan();
+  if(mode==='appointments')return renderAppointments();
   if(mode==='audit')return renderAudit();
   if(mode==='new')return renderForm(null);
   const r=rows.find(x=>x.id===openId);
@@ -1233,7 +1234,8 @@ $('close').onclick=closeDrawer;$('scrim').onclick=closeDrawer;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('confirm').classList.contains('open'))$('cNo').click();else if($('drawer').classList.contains('open'))closeDrawer();}});
 $('addBtn').onclick=()=>openDrawer(null,'new');
 $('usersBtn').onclick=()=>openDrawer(null,'users');
-$('iklanBtn').onclick=()=>openDrawer(null,'iklan');\n$('appointmentBtn').onclick=()=>openDrawer(null,'appointments');
+$('iklanBtn').onclick=()=>openDrawer(null,'iklan');
+$('appointmentBtn').onclick=()=>openDrawer(null,'appointments');
 $('auditBtn').onclick=()=>{watchAudit();openDrawer(null,'audit');};
 $('exportBtn').onclick=exportExcel;
 $('logoutBtn').onclick=async()=>{$('logoutBtn').disabled=true;await audit('logout');try{sessionStorage.removeItem('pjk-login-'+(me&&me.uid))}catch(e){};$('logoutBtn').disabled=false;signOut(auth);};
