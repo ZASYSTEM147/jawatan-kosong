@@ -822,7 +822,7 @@ const OWNER_EMAIL = "za.system.147@gmail.com";
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, deleteDoc, deleteField, onSnapshot, writeBatch, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, deleteDoc, deleteField, onSnapshot, writeBatch, query, orderBy, limit, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const STAGES=[
   {k:'IKLAN',l:'Iklan',fields:[['tarikhIklan','Tarikh iklan'],['tarikhTutup','Tarikh tutup iklan']]},
@@ -1354,7 +1354,7 @@ function renderIklanList(){
       dl=[x.tarikh?T('Tarikh iklan')+': '+isoToDmy(x.tarikh):'',x.tarikhTutup?T('Tarikh tutup')+': '+isoToDmy(x.tarikhTutup):''].filter(Boolean).join(' · ');
     }
     return `<div class="iitem"><div class="pdfcard"><div class="pdfic" aria-hidden="true">PDF</div><div class="pdfmeta">${x.job?`<span class="srctag">${T('Dari rekod jawatan')}</span><br>`:''}<b>${esc(ikHead(x))}</b>${sub?`<span>${esc(sub)}</span><br>`:''}${dl?`<span class="idates">${esc(dl)}</span><br>`:''}<span class="ifile">${esc(f.name||'')} (${fmtSize(f.size||0)})${when?', '+T('dimuat naik')+' '+esc(when):''}${f.uploadedBy?' '+T('oleh')+' '+esc(f.uploadedBy):''}</span></div></div>
-      <div class="pdfact"><button class="btn" data-ik-open="${esc(x.id)}">${T('Buka')}</button><button class="btn" data-ik-dl="${esc(x.id)}">${T('Muat turun')}</button>${x.job?`<button class="btn" data-ik-job="${esc(x.job.id)}">${T('Lihat jawatan')}</button>`:(isAdmin?`<button class="linkbtn" data-ik-del="${esc(x.id)}">${T('Buang')}</button>`:'')}</div></div>`;
+      <div class="pdfact"><button class="btn" data-ik-open="${esc(x.id)}">${T('Buka')}</button><button class="btn" data-ik-dl="${esc(x.id)}">${T('Muat turun')}</button>${x.job?`<button class="btn" data-ik-job="${esc(x.job.id)}">${T('Lihat jawatan')}</button>`:(isAdmin?`<button class="btn" data-ik-edit="${esc(x.id)}">Edit</button><button class="linkbtn" data-ik-del="${esc(x.id)}">${T('Buang')}</button>`:'')}</div></div>`;
   }).join('');
   const byId=id=>list.find(x=>x.id===id);
   const ctx=x=>x?(x.job?jobName(x.job):'Iklan: '+ikHead(x)):'';
@@ -1367,6 +1367,20 @@ function renderIklanList(){
     /* Replace filename-forbidden path separators while keeping the displayed reference/title. */
     const downloadName=displayName.replace(/[\\\\/:*?"<>|]+/g,'_').replace(/\\s+/g,' ').trim()+'.pdf';
     openFile({...x.fail,name:downloadName},true,ctx(x));
+  });
+  box.querySelectorAll('[data-ik-edit]').forEach(b=>b.onclick=async()=>{
+    const x=byId(b.dataset.ikEdit); if(!x||x.job)return;
+    const bilangan=prompt('Bilangan iklan:',x.bilangan||''); if(bilangan===null)return;
+    const tajuk=prompt('Jenis / tajuk iklan:',x.tajuk||''); if(tajuk===null)return;
+    const tarikh=prompt('Tarikh iklan (dd/mm/yyyy, kosong jika tiada):',x.tarikh?isoToDmy(x.tarikh):''); if(tarikh===null)return;
+    const tarikhTutup=prompt('Tarikh tutup iklan (dd/mm/yyyy, kosong jika tiada):',x.tarikhTutup?isoToDmy(x.tarikhTutup):''); if(tarikhTutup===null)return;
+    const toIsoOrEmpty=v=>{const t=String(v||'').trim();if(!t)return '';const iso=dmyToIso(t);if(!iso)throw new Error('Gunakan format tarikh dd/mm/yyyy.');return iso;};
+    try{
+      const updated={bilangan:bilangan.trim(),tajuk:tajuk.trim(),tarikh:toIsoOrEmpty(tarikh),tarikhTutup:toIsoOrEmpty(tarikhTutup),updatedAt:new Date().toISOString()};
+      await updateDoc(doc(fdb,'iklan',x.id),updated);
+      audit('edit_iklan',updated.bilangan,{fields:['bilangan','tajuk','tarikh','tarikhTutup'],file:x.fail&&x.fail.name||''});
+      toast('Maklumat iklan dikemas kini.');
+    }catch(e){toast(e&&e.message?e.message:errMsg(e));}
   });
   box.querySelectorAll('[data-ik-del]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikDel);if(!x)return;ask(T('Buang iklan ini?'),T('“{n}” akan dibuang untuk semua pengguna.',{n:ikHead(x)}),async()=>{try{await deleteDoc(doc(fdb,'iklan',x.id));audit('remove_iklan',ikHead(x),{file:x.fail&&x.fail.name||''});delChunks(x.fail).catch(()=>{});toast(T('Iklan dibuang.'))}catch(e){toast(errMsg(e))}})});
 }
