@@ -1225,13 +1225,13 @@ function renderIklan(){
     ${isAdmin?`<section class="pdfsec"><h3>${T('Muat naik iklan baharu')}</h3>
       <form id="ikf" class="grid2" novalidate>
         <label class="f full">${T('Bilangan iklan')} *<input name="bilangan" type="text" placeholder="${T('cth. 2026/OCT/01/KPDK')}"></label>
-        <label class="f full">${T('Jenis iklan')}
+        <label class="f full">${T('Pilih jenis iklan')}
           <select name="jenisIklanPilihan" id="jenisIklanPilihan">
             <option value="Iklan 38 (B)">Iklan 38 (B)</option>
             <option value="Iklan 7 (A)">Iklan 7 (A)</option>
           </select>
         </label>
-        <label class="f full">${T('Tajuk iklan (pilihan)')}<input name="tajuk" id="tajukIklan" type="text" placeholder="${T('cth. Iklan 7A Tahun 2026')}"></label>
+        <input name="tajuk" id="tajukIklan" type="hidden" value="">
         ${dateField('tarikh',T('Tarikh iklan (pilihan)'))}
         ${dateField('tarikhTutup',T('Tarikh tutup iklan (pilihan)'))}
         <label class="f full">${T('Fail PDF (maksimum 10 MB)')} *<input name="fail" type="file" accept="application/pdf,.pdf"></label><p id="ikPdfAutoStatus" class="pdfnone full" aria-live="polite" style="margin-top:-8px">Pilih PDF untuk mengisi maklumat secara automatik. Semak semula sebelum muat naik.</p>
@@ -1247,13 +1247,8 @@ function renderIklan(){
     const ikForm=$('ikf');
     const titleType=ikForm.querySelector('[name="jenisIklanPilihan"]');
     const titleInput=ikForm.querySelector('[name="tajuk"]');
-    const syncAdvertTitle=()=>{
-      if(!titleInput.dataset.edited || !titleInput.value.trim()){
-        titleInput.value=titleType.value;
-      }
-    };
-    titleType.addEventListener('change',()=>{titleInput.dataset.edited='';syncAdvertTitle();});
-    titleInput.addEventListener('input',()=>{titleInput.dataset.edited='1';});
+    const syncAdvertTitle=()=>{ titleInput.value=titleType.value; };
+    titleType.addEventListener('change',syncAdvertTitle);
     syncAdvertTitle();
     const ikFile=ikForm.querySelector('input[name="fail"]');
     ikFile.addEventListener('change',async()=>{
@@ -1702,19 +1697,7 @@ else{
 </style>
 
 
-<script>
-(function(){
-  function setCurrentYear(){
-    const year = String(new Date().getFullYear());
-    document.querySelectorAll('select[data-current-year="true"]').forEach(function(select){
-      const option = Array.from(select.options).find(function(opt){ return opt.value === year || opt.textContent.trim() === year; });
-      if(option) select.value = option.value;
-    });
-  }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setCurrentYear, {once:true});
-  else setCurrentYear();
-})();
-</script>
+
 
 </body>
 </html>
