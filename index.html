@@ -612,6 +612,18 @@ td{padding-top:16px;padding-bottom:16px}
 /* Hide uploaded PDF filename/size/uploaded-by metadata from the visible advert list */
 .ifile { display: none !important; }
 
+
+/* Step-by-step advert edit dialog */
+.edit-wizard{position:fixed;inset:0;display:none;place-items:center;z-index:35;background:rgba(8,15,28,.62);padding:18px}
+.edit-wizard.open{display:grid}
+.edit-wizard .ew-box{width:min(100%,440px);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+.edit-wizard h3{margin:0 0 6px;font-size:18px}
+.edit-wizard .ew-progress{font-size:12px;color:var(--muted);margin-bottom:16px}
+.edit-wizard label{display:flex;flex-direction:column;gap:7px;font-size:13px;font-weight:600;color:var(--muted)}
+.edit-wizard input{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font:inherit}
+.edit-wizard .ew-actions{display:flex;gap:8px;justify-content:space-between;margin-top:18px}\n.edit-wizard .ew-form{display:grid;gap:12px}\n@media(max-width:480px){.edit-wizard{padding:10px}.edit-wizard .ew-box{padding:15px;max-height:92vh;overflow:auto}.edit-wizard .ew-form{gap:10px}.edit-wizard input{min-height:42px}}
+.edit-wizard .ew-actions .right{display:flex;gap:8px;margin-left:auto}
+
 </style>
 
 <style id="blue-login-card">
@@ -795,6 +807,22 @@ td{padding-top:16px;padding-bottom:16px}
     <h3 id="cTitle">Padam?</h3>
     <p id="cText"></p>
     <div class="row"><button class="btn" id="cNo">Batal</button><button class="btn danger" id="cYes">Padam</button></div>
+  </div>
+</div>
+<div class="edit-wizard" id="editWizard" role="dialog" aria-modal="true" aria-labelledby="editWizardTitle">
+  <div class="ew-box">
+    <h3 id="editWizardTitle">Edit rekod iklan</h3>
+    <div class="ew-progress">Ubah semua maklumat di bawah, kemudian tekan OK untuk menyimpan.</div>
+    <form id="editAdvertForm" class="ew-form">
+      <label>Bilangan iklan<input id="editBilangan" name="bilangan" type="text" required></label>
+      <label>Jenis / tajuk iklan<input id="editTajuk" name="tajuk" type="text"></label>
+      <label>Tarikh iklan (dd/mm/yyyy)<input id="editTarikh" name="tarikh" type="text" inputmode="numeric" placeholder="dd/mm/yyyy"></label>
+      <label>Tarikh tutup iklan (dd/mm/yyyy)<input id="editTarikhTutup" name="tarikhTutup" type="text" inputmode="numeric" placeholder="dd/mm/yyyy"></label>
+      <div class="ew-actions">
+        <button type="button" class="btn" id="ewCancel">Batal</button>
+        <div class="right"><button type="submit" class="btn primary" id="ewNext">OK · Simpan</button></div>
+      </div>
+    </form>
   </div>
 </div>
 <div class="toast" id="toast" role="status"></div>
@@ -1368,22 +1396,58 @@ function renderIklanList(){
     const downloadName=displayName.replace(/[\\\\/:*?"<>|]+/g,'_').replace(/\\s+/g,' ').trim()+'.pdf';
     openFile({...x.fail,name:downloadName},true,ctx(x));
   });
-  box.querySelectorAll('[data-ik-edit]').forEach(b=>b.onclick=async()=>{
-    const x=byId(b.dataset.ikEdit); if(!x||x.job)return;
-    const bilangan=prompt('Bilangan iklan:',x.bilangan||''); if(bilangan===null)return;
-    const tajuk=prompt('Jenis / tajuk iklan:',x.tajuk||''); if(tajuk===null)return;
-    const tarikh=prompt('Tarikh iklan (dd/mm/yyyy, kosong jika tiada):',x.tarikh?isoToDmy(x.tarikh):''); if(tarikh===null)return;
-    const tarikhTutup=prompt('Tarikh tutup iklan (dd/mm/yyyy, kosong jika tiada):',x.tarikhTutup?isoToDmy(x.tarikhTutup):''); if(tarikhTutup===null)return;
-    const toIsoOrEmpty=v=>{const t=String(v||'').trim();if(!t)return '';const iso=dmyToIso(t);if(!iso)throw new Error('Gunakan format tarikh dd/mm/yyyy.');return iso;};
-    try{
-      const updated={bilangan:bilangan.trim(),tajuk:tajuk.trim(),tarikh:toIsoOrEmpty(tarikh),tarikhTutup:toIsoOrEmpty(tarikhTutup),updatedAt:new Date().toISOString()};
-      await updateDoc(doc(fdb,'iklan',x.id),updated);
-      audit('edit_iklan',updated.bilangan,{fields:['bilangan','tajuk','tarikh','tarikhTutup'],file:x.fail&&x.fail.name||''});
-      toast('Maklumat iklan dikemas kini.');
-    }catch(e){toast(e&&e.message?e.message:errMsg(e));}
+  box.querySelectorAll('[data-ik-edit]').forEach(b=>b.onclick=()=>{
+    const x=byId(b.dataset.ikEdit); if(x&&!x.job)startAdvertEditWizard(x);
   });
   box.querySelectorAll('[data-ik-del]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikDel);if(!x)return;ask(T('Buang iklan ini?'),T('“{n}” akan dibuang untuk semua pengguna.',{n:ikHead(x)}),async()=>{try{await deleteDoc(doc(fdb,'iklan',x.id));audit('remove_iklan',ikHead(x),{file:x.fail&&x.fail.name||''});delChunks(x.fail).catch(()=>{});toast(T('Iklan dibuang.'))}catch(e){toast(errMsg(e))}})});
 }
+
+
+let editWizardState=null;
+function startAdvertEditWizard(x){
+  editWizardState={id:x.id,original:x};
+  $('editBilangan').value=x.bilangan||'';
+  $('editTajuk').value=x.tajuk||'';
+  $('editTarikh').value=x.tarikh?isoToDmy(x.tarikh):'';
+  $('editTarikhTutup').value=x.tarikhTutup?isoToDmy(x.tarikhTutup):'';
+  $('editWizard').classList.add('open');
+  setTimeout(()=>$('editBilangan').focus(),30);
+}
+function closeAdvertEditWizard(){
+  $('editWizard').classList.remove('open');editWizardState=null;
+}
+$('ewCancel').onclick=closeAdvertEditWizard;
+$('editAdvertForm').onsubmit=async e=>{
+  e.preventDefault();
+  if(!editWizardState)return;
+  const st=editWizardState;
+  const toIsoOrEmpty=v=>{
+    if(!String(v||'').trim())return '';
+    const iso=dmyToIso(v);
+    if(!iso)throw new Error('Gunakan format tarikh dd/mm/yyyy atau kosongkan jika tiada.');
+    return iso;
+  };
+  const bilangan=$('editBilangan').value.trim();
+  if(!bilangan){toast('Sila masukkan bilangan iklan.');$('editBilangan').focus();return}
+  let updated;
+  try{
+    updated={
+      bilangan,
+      tajuk:$('editTajuk').value.trim(),
+      tarikh:toIsoOrEmpty($('editTarikh').value),
+      tarikhTutup:toIsoOrEmpty($('editTarikhTutup').value),
+      updatedAt:new Date().toISOString()
+    };
+  }catch(err){toast(err.message||'Sila semak tarikh.');return}
+  const saveButton=$('ewNext');
+  saveButton.disabled=true;saveButton.textContent='Menyimpan…';
+  try{
+    await updateDoc(doc(fdb,'iklan',st.id),updated);
+    audit('edit_iklan',updated.bilangan,{fields:['bilangan','tajuk','tarikh','tarikhTutup'],file:st.original.fail&&st.original.fail.name||''});
+    closeAdvertEditWizard();toast('Maklumat iklan dikemas kini.');
+  }catch(err){toast(err&&err.message?err.message:errMsg(err))}
+  finally{saveButton.disabled=false;saveButton.textContent='OK · Simpan'}
+};
 function watchIklan(){
   if(unsubIklan)return;
   unsubIklan=onSnapshot(collection(fdb,'iklan'),s=>{iklans=s.docs.map(d=>({id:d.id,...d.data()}));iklanLoaded=true;if(mode==='iklan')renderIklanList();},()=>{iklanLoaded=true;if(mode==='iklan')renderIklanList();});
