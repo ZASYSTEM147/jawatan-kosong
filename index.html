@@ -720,7 +720,7 @@ td{padding-top:16px;padding-bottom:16px}
       <img class="logo" data-logo alt="Kementerian Pendidikan Brunei Darussalam" data-i18n-alt="Kementerian Pendidikan Brunei Darussalam">
       <div class="brand">
         <h1 class="title" data-i18n="Proses Jawatan Kosong">Proses Jawatan Kosong</h1>
-        <p class="subtitle" data-i18n="Unit Pengurusan Sumber Manusia, Bahagian Sumber Manusia">Unit Pengurusan Sumber Manusia, Bahagian Sumber Manusia</p>
+        <p class="subtitle" >Urus Setia Pengambilan Kementerian<br>Unit Pengurusan Sumber Manusia<br>Bahagian Sumber Manusia<br>Jabatan Pentadbiran dan Perkhidmatan-Perkhidmatan<br>Kementerian Pendidikan<br>Telephone / Whatsapp : +673 2380450</p>
         <p class="subtitle" data-i18n="Jabatan Pentadbiran dan Perkhidmatan-Perkhidmatan, Kementerian Pendidikan">Jabatan Pentadbiran dan Perkhidmatan-Perkhidmatan, Kementerian Pendidikan</p>
         <p class="subtitle short" data-i18n="Unit Pengurusan Sumber Manusia">Unit Pengurusan Sumber Manusia</p>
       </div>
@@ -771,7 +771,7 @@ td{padding-top:16px;padding-bottom:16px}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a6 6 0 0 1 12 0v1M16 11a3 3 0 1 0 0-6M18 14a5 5 0 0 1 3 5v1"/></svg><span data-i18n="Rekod Lantikan">Rekod Lantikan</span>
     </button>
     <button class="btn" id="exportBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg><span data-i18n="Excel">Excel</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg><span data-i18n="Export Excel">Export Excel</span>
     </button>
     <button class="btn primary" id="addBtn" hidden>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="Tambah jawatan">Tambah jawatan</span>
@@ -875,7 +875,7 @@ const EN={
 'Kementerian Pendidikan Brunei Darussalam':'Ministry of Education Brunei Darussalam',
 'Proses Jawatan Kosong':'Vacancy Process Tracker',
 'Unit Pengurusan Sumber Manusia':'Human Resource Management Unit',
-'Unit Pengurusan Sumber Manusia, Bahagian Sumber Manusia':'Human Resource Management Unit, Human Resources Division',
+'Urus Setia Pengambilan Kementerian<br>Unit Pengurusan Sumber Manusia<br>Bahagian Sumber Manusia<br>Jabatan Pentadbiran dan Perkhidmatan-Perkhidmatan<br>Kementerian Pendidikan':'Human Resource Management Unit, Human Resources Division',
 'Jabatan Pentadbiran dan Perkhidmatan-Perkhidmatan, Kementerian Pendidikan':'Department of Administration and Services, Ministry of Education',
 'Unit Pengurusan Sumber Manusia<br>Bahagian Sumber Manusia<br>Jabatan Pentadbiran dan Perkhidmatan-Perkhidmatan':'Human Resource Management Unit<br>Human Resources Division<br>Department of Administration and Services',
 'Tetapan belum lengkap':'Setup not complete',
@@ -925,7 +925,7 @@ const EN={
 'Pengguna':'Users','Hanya emel dalam senarai ini boleh membuka sistem.':'Only emails on this list can open the system.','Tambah pengguna':'Add user',
 'Masukkan alamat Gmail mereka. Mereka log masuk dengan butang “Log masuk dengan Google”.':'Enter their Gmail address. They sign in with the “Sign in with Google” button.',
 'Alamat Gmail':'Gmail address','Nama (pilihan)':'Name (optional)','Peranan':'Role','Senarai pengguna':'User list','Admin utama (ditetapkan dalam tetapan)':'Main admin (set in the settings)',
-'Import data awal':'Import starter data','Muat naik fail <code>data-awal.json</code> sekali sahaja untuk memasukkan rekod dari Excel. Rekod dengan nombor yang sama akan ditulis semula.':'Upload the <code>data-awal.json</code> file once to bring in the records from Excel. Records with the same number will be overwritten.',
+'Import data awal':'Import starter data','Muat naik fail JSON atau Excel (.xlsx) untuk memasukkan rekod. Rekod dengan rujukan iklan yang sama akan dikemas kini.':'Upload a JSON or Excel (.xlsx) file to import records. Records with the same advert reference will be updated.','Import dari Excel':'Import from Excel','Fail Excel tidak dapat dibaca. Gunakan fail .xlsx.':'The Excel file could not be read. Use an .xlsx file.','Muat naik fail <code>data-awal.json</code> sekali sahaja untuk memasukkan rekod dari Excel. Rekod dengan nombor yang sama akan ditulis semula.':'Upload the <code>data-awal.json</code> file once to bring in the records from Excel. Records with the same number will be overwritten.',
 'Pilih fail JSON':'Choose JSON file','Masukkan alamat emel yang sah.':'Enter a valid email address.','Emel ini sudah admin utama.':'This email is already the main admin.','Pengguna ditambah.':'User added.','Peranan dikemas kini.':'Role updated.',
 'Buang pengguna ini?':'Remove this user?','{e} tidak lagi boleh membuka sistem.':'{e} will no longer be able to open the system.','Pengguna dibuang.':'User removed.',
 'Import data?':'Import data?','{n} rekod akan dimasukkan ke dalam sistem.':'{n} records will be added to the system.','{n} rekod diimport.':v=>v.n==1?'1 record imported.':'{n} records imported.','Import':'Import','Fail tidak dapat dibaca. Gunakan data-awal.json.':'The file could not be read. Use data-awal.json.',
@@ -1545,9 +1545,11 @@ function renderUsers(){
           <select data-role="${esc(u.id)}" aria-label="${T('Peranan')} ${esc(u.id)}"><option value="viewer" ${u.role!=='admin'?'selected':''}>${T('Paparan sahaja')}</option><option value="admin" ${u.role==='admin'?'selected':''}>${T('Admin')}</option></select>
           <button class="linkbtn" data-del="${esc(u.id)}">${T('Buang')}</button></li>`).join('')}
       </ul></div>
-    <div class="sec"><h3>${T('Import data awal')}</h3><p>${T('Muat naik fail <code>data-awal.json</code> sekali sahaja untuk memasukkan rekod dari Excel. Rekod dengan nombor yang sama akan ditulis semula.')}</p>
+    <div class="sec"><h3>${T('Import data awal')}</h3><p>${T('Muat naik fail JSON atau Excel (.xlsx) untuk memasukkan rekod. Rekod dengan rujukan iklan yang sama akan dikemas kini.')}</p>
       <input type="file" id="impFile" accept=".json,application/json" hidden>
-      <button class="btn" id="impBtn">${T('Pilih fail JSON')}</button></div>`;
+      <button class="btn" id="impBtn">${T('Pilih fail JSON')}</button>
+      <input type="file" id="impExcelFile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+      <button class="btn" id="impExcelBtn" style="margin-left:6px">${T('Import dari Excel')}</button></div>`;
   $('dFoot').hidden=true;$('dFoot').innerHTML='';
   $('uf').onsubmit=async e=>{
     e.preventDefault();const fd=new FormData(e.target);
@@ -1562,6 +1564,126 @@ function renderUsers(){
   $('dBody').querySelectorAll('[data-role]').forEach(s=>s.onchange=async()=>{try{await setDoc(doc(fdb,'users',s.dataset.role),{role:s.value},{merge:true});audit('change_role',s.dataset.role,{role:s.value});toast(T('Peranan dikemas kini.'))}catch(e){toast(errMsg(e))}});
   $('dBody').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>ask(T('Buang pengguna ini?'),T('{e} tidak lagi boleh membuka sistem.',{e:b.dataset.del}),async()=>{try{await deleteDoc(doc(fdb,'users',b.dataset.del));audit('remove_user',b.dataset.del);toast(T('Pengguna dibuang.'))}catch(e){toast(errMsg(e))}}));
   $('impBtn').onclick=()=>$('impFile').click();
+
+  $('impExcelBtn').onclick=()=>$('impExcelFile').click();
+  $('impExcelFile').onchange=async e=>{
+    const file=e.target.files&&e.target.files[0];if(!file)return;
+    try{
+      if(!/\.xlsx$/i.test(file.name))throw new Error('Sila pilih fail Excel .xlsx.');
+      const ExcelJS=await loadExcelJS();
+      const wb=new ExcelJS.Workbook();
+      await wb.xlsx.load(await file.arrayBuffer());
+      const ws=wb.worksheets[0];
+      if(!ws||ws.rowCount<2)throw new Error('Fail Excel tiada rekod.');
+      const norm=v=>String(v??'').toLowerCase().replace(/[\s\n\r./_-]+/g,' ').trim();
+      const cellText=c=>{
+        if(!c)return '';
+        const v=c.value;
+        if(v==null)return '';
+        if(v instanceof Date)return formatExcelDate(v);
+        if(typeof v==='object'){
+          if(v.text)return String(v.text);
+          if(v.richText)return v.richText.map(z=>z.text||'').join('');
+          if(v.result!=null)return String(v.result);
+        }
+        return String(v).trim();
+      };
+      const formatExcelDate=d=>{
+        const dt=d instanceof Date?d:new Date(d);
+        if(Number.isNaN(dt.getTime()))return String(d||'');
+        const months=['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'];
+        return `${String(dt.getDate()).padStart(2,'0')} ${months[dt.getMonth()]} ${dt.getFullYear()}`;
+      };
+      const headers=[];
+      ws.getRow(1).eachCell({includeEmpty:true},(c,n)=>headers[n]=norm(cellText(c)));
+      const headerIndex=(aliases,fallback)=> {
+        const ix=headers.findIndex(h=>aliases.some(a=>h===norm(a)||h.includes(norm(a))));
+        return ix>0?ix:fallback;
+      };
+      const cols={
+        bil:headerIndex(['bil.','bil','no.'],1),
+        kod:headerIndex(['kod'],2),
+        status:headerIndex(['status'],3),
+        job:headerIndex(['nama jawatan','jawatan / jabatan','jawatan'],4),
+        gaji:headerIndex(['tangga gaji','gaji'],5),
+        iklan:headerIndex(['bilangan iklan','rujukan iklan'],6),
+        vacancy:headerIndex(['kekosongan'],7),
+        tarikhIklan:headerIndex(['tarikh iklan'],8),
+        tarikhTutup:headerIndex(['tarikh tutup iklan'],9),
+        perakuan:headerIndex(['tarikh perakuan'],10),
+        ujian:headerIndex(['tarikh ujian'],11),
+        verifikasi:headerIndex(['tarikh verifikasi'],12),
+        temuduga:headerIndex(['tarikh temuduga','tarikh temu duga'],13),
+        qct:headerIndex(['tarikh dihadapkan ke spa','tarikh qct'],14),
+        kertas:headerIndex(['tarikh kertas kerja sokongan','tarikh kertas sokongan'],15),
+        lantikan:headerIndex(['lantikan'],16)
+      };
+      const statusMap=[
+        [/selesai/i,'SELESAI'],[/kertas sokongan/i,'KERTAS SOKONGAN'],[/temu.?duga/i,'TEMUDUGA'],
+        [/verifikasi/i,'VERIFIKASI'],[/ujian/i,'UJIAN'],[/perakuan/i,'PERAKUAN'],[/spa.*qct|qct/i,'SPA (QCT)'],[/iklan/i,'IKLAN']
+      ];
+      const records=[];
+      for(let rn=2;rn<=ws.rowCount;rn++){
+        const row=ws.getRow(rn);
+        const get=k=>cellText(row.getCell(cols[k]));
+        const combined=get('job');
+        if(!combined.trim())continue;
+        const lines=combined.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+        const refParts=get('iklan').split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+        const statusRaw=get('status').replace(/✔/g,'').trim();
+        const status=(statusMap.find(([rx])=>rx.test(statusRaw))||[])[1]||'IKLAN';
+        const ref=refParts[0]||'';
+        const vacancyRaw=get('vacancy')||((refParts.find(s=>/kekosongan/i.test(s))||'').match(/\d+/)||[])[0]||'0';
+        const type=refParts.find(s=>/^iklan\b/i.test(s))||'';
+        const record={
+          bil:parseInt(get('bil'),10)||records.length+1,
+          kod:get('kod'),
+          status,
+          jawatan:lines[0]||combined,
+          jabatan:lines.slice(1).join(' '),
+          tanggaGaji:get('gaji'),
+          rujukanIklan:ref,
+          jenisIklan:type,
+          kekosongan:Math.max(0,parseInt(vacancyRaw,10)||0),
+          tarikhIklan:get('tarikhIklan'),
+          tarikhTutup:get('tarikhTutup'),
+          tarikhPerakuan:get('perakuan'),
+          tarikhUjian:get('ujian'),
+          tarikhVerifikasi:get('verifikasi'),
+          tarikhTemuduga:get('temuduga'),
+          tarikhQCT:get('qct'),
+          tarikhKertasSokongan:get('kertas'),
+          lantikan:get('lantikan'),
+          catatan:'',
+          updatedAt:new Date().toISOString(),
+          updatedBy:me.displayName||me.email
+        };
+        records.push(record);
+      }
+      if(!records.length)throw new Error('Tiada rekod jawatan dapat dibaca. Pastikan baris pertama mengandungi tajuk lajur.');
+      ask(T('Import data?'),T('{n} rekod akan dimasukkan ke dalam sistem.',{n:records.length}),async()=>{
+        try{
+          const existingByRef=new Map(rows.filter(r=>r.rujukanIklan).map(r=>[String(r.rujukanIklan).trim().toLowerCase(),r]));
+          const writes=[];
+          records.forEach((r,i)=>{
+            const match=r.rujukanIklan?existingByRef.get(r.rujukanIklan.trim().toLowerCase()):null;
+            const id=match?match.id:`xl_${String(r.rujukanIklan||`${r.bil}_${r.jawatan}`).toLowerCase().replace(/[^a-z0-9_-]+/g,'_').replace(/^_+|_+$/g,'').slice(0,120)}_${i}`;
+            writes.push({id,data:r});
+          });
+          let count=0;
+          for(let i=0;i<writes.length;i+=400){
+            const batch=writeBatch(fdb);
+            writes.slice(i,i+400).forEach(w=>batch.set(doc(fdb,'jawatan',w.id),w.data,{merge:true}));
+            await batch.commit();count+=Math.min(400,writes.length-i);
+          }
+          audit('import_excel',file.name,{count});
+          toast(T('{n} rekod diimport.',{n:count}));
+        }catch(err){toast(errMsg(err))}
+      },T('Import'));
+    }catch(err){console.error(err);toast(err&&err.message?err.message:T('Fail Excel tidak dapat dibaca. Gunakan fail .xlsx.'))}
+    e.target.value='';
+  };
+
   $('impFile').onchange=async e=>{
     const f=e.target.files[0];if(!f)return;
     try{
