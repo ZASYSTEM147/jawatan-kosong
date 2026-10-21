@@ -517,6 +517,97 @@ td{padding-top:16px;padding-bottom:16px}
   .stage .v { font-size: 11px !important; }
 }
 
+
+/* Compact mobile view: reduce header height, controls, and pipeline card size */
+@media (max-width: 700px) {
+  header, .site-header, .topbar, .header-inner {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+  .brand, .brand-row, .header-brand {
+    gap: 10px !important;
+  }
+  .brand img, .logo, .brand-logo, header img {
+    max-width: 88px !important;
+    max-height: 56px !important;
+    object-fit: contain !important;
+  }
+  h1 {
+    font-size: clamp(21px, 5.6vw, 28px) !important;
+    line-height: 1.12 !important;
+    margin: 0 0 5px !important;
+  }
+  .subtitle, .department, .brand-subtitle {
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+  }
+  .user-row, .user-info, .account-row {
+    gap: 8px !important;
+  }
+  .user-info, .account-info {
+    font-size: 13px !important;
+    line-height: 1.25 !important;
+  }
+  button, .btn, .nav-btn {
+    min-height: 38px !important;
+    padding: 8px 11px !important;
+    font-size: 13px !important;
+  }
+  .language-switch, .lang-switch, .lang-toggle {
+    padding: 3px !important;
+    gap: 4px !important;
+  }
+  .language-switch button, .lang-switch button, .lang-toggle button {
+    min-width: 46px !important;
+    min-height: 42px !important;
+    padding: 7px 10px !important;
+  }
+  .summary {
+    font-size: 18px !important;
+    line-height: 1.25 !important;
+    margin: 0 0 8px !important;
+  }
+  .pipe-scroll {
+    padding-bottom: 4px !important;
+  }
+  .pipe {
+    gap: 0 !important;
+    border-radius: 10px !important;
+  }
+  .stage {
+    padding: 9px 9px 12px !important;
+    min-height: 0 !important;
+  }
+  .stage .step {
+    font-size: 10px !important;
+    margin-bottom: 4px !important;
+  }
+  .stage .n {
+    font-size: clamp(21px, 6vw, 26px) !important;
+    line-height: 1.1 !important;
+    margin: 0 0 4px !important;
+  }
+  .stage .l {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    overflow-wrap: anywhere !important;
+  }
+  .stage .v {
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+    margin-top: 2px !important;
+  }
+}
+@media (max-width: 390px) {
+  .stage { padding: 8px 7px 10px !important; }
+  .stage .l { font-size: 10.5px !important; }
+  .stage .v { font-size: 9.5px !important; }
+  .brand img, .logo, .brand-logo, header img {
+    max-width: 72px !important;
+    max-height: 48px !important;
+  }
+}
+
 </style>
 
 <style id="blue-login-card">
