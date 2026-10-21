@@ -440,6 +440,46 @@ td{padding-top:16px;padding-bottom:16px}
   tbody tr { padding: 12px; }
 }
 
+
+/* Header hierarchy update: prominent title first, account/tools row beneath */
+.top .wrap{display:flex;flex-direction:column;align-items:stretch;gap:14px;padding-top:16px;padding-bottom:14px}
+.top-heading{display:flex;align-items:center;gap:20px;min-width:0;width:100%}
+.top-heading .logo{height:78px;width:auto;max-width:220px;object-fit:contain}
+.top-heading .brand{flex:1 1 auto;max-width:none;min-width:0}
+.top-heading .title{font-size:clamp(25px,3vw,34px);line-height:1.12;letter-spacing:-.025em;margin-bottom:5px}
+.top-heading .subtitle{font-size:13px;line-height:1.4}
+.top-heading .subtitle.short{display:none}
+.top-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;padding-top:12px;border-top:1px solid var(--line)}
+.top-controls .who{margin-right:auto}
+.top-controls .who-l,.top-controls .who-e{display:block}
+.top-controls .who-n{max-width:240px}
+@media(max-width:820px){
+ .top .wrap{gap:12px;padding-top:13px;padding-bottom:12px}
+ .top-heading{gap:12px;align-items:center}
+ .top-heading .logo{height:60px;max-width:120px}
+ .top-heading .title{font-size:23px}
+ .top-heading .subtitle{display:block;font-size:11.5px;line-height:1.35}
+ .top-heading .subtitle.short{display:none}
+ .top-controls{gap:7px;padding-top:10px}
+ .top-controls .who{flex:1 1 100%;margin-right:0;order:0}
+ .top-controls .who-l,.top-controls .who-e{display:block}
+ .top-controls .who-n,.top-controls .who-e{max-width:calc(100vw - 90px)}
+ .top-controls .role{order:1}
+ .top-controls #usersBtn{order:2}
+ .top-controls #auditBtn{order:3}
+ .top-controls .langsw{order:4}
+ .top-controls #themeBtn{order:5}
+ .top-controls #logoutBtn{order:6}
+ .top-controls .btn{min-height:40px;padding:7px 10px;font-size:13px}
+}
+@media(max-width:420px){
+ .top-heading{align-items:flex-start;gap:10px}
+ .top-heading .logo{height:50px;max-width:88px}
+ .top-heading .title{font-size:21px}
+ .top-heading .subtitle{font-size:10.5px}
+ .top-controls .who-l,.top-controls .who-e{display:block}
+}
+
 </style>
 
 <style id="blue-login-card">
@@ -509,28 +549,31 @@ td{padding-top:16px;padding-bottom:16px}
 <div id="sApp" hidden>
 <header class="top">
   <div class="wrap">
-    <img class="logo" data-logo alt="Kementerian Pendidikan Brunei Darussalam" data-i18n-alt="Kementerian Pendidikan Brunei Darussalam">
-    <div class="brand">
-      <h1 class="title" data-i18n="Proses Jawatan Kosong">Proses Jawatan Kosong</h1>
-      <p class="subtitle" data-i18n="Unit Pengurusan Sumber Manusia, Bahagian Sumber Manusia">Unit Pengurusan Sumber Manusia, Bahagian Sumber Manusia</p>
-      <p class="subtitle" data-i18n="Jabatan Pentadbiran dan Perkhidmatan-Perkhidmatan, Kementerian Pendidikan">Jabatan Pentadbiran dan Perkhidmatan-Perkhidmatan, Kementerian Pendidikan</p>
-      <p class="subtitle short" data-i18n="Unit Pengurusan Sumber Manusia">Unit Pengurusan Sumber Manusia</p>
+    <div class="top-heading">
+      <img class="logo" data-logo alt="Kementerian Pendidikan Brunei Darussalam" data-i18n-alt="Kementerian Pendidikan Brunei Darussalam">
+      <div class="brand">
+        <h1 class="title" data-i18n="Proses Jawatan Kosong">Proses Jawatan Kosong</h1>
+        <p class="subtitle" data-i18n="Unit Pengurusan Sumber Manusia, Bahagian Sumber Manusia">Unit Pengurusan Sumber Manusia, Bahagian Sumber Manusia</p>
+        <p class="subtitle" data-i18n="Jabatan Pentadbiran dan Perkhidmatan-Perkhidmatan, Kementerian Pendidikan">Jabatan Pentadbiran dan Perkhidmatan-Perkhidmatan, Kementerian Pendidikan</p>
+        <p class="subtitle short" data-i18n="Unit Pengurusan Sumber Manusia">Unit Pengurusan Sumber Manusia</p>
+      </div>
     </div>
-    <div class="spacer"></div>
-    <div class="who">
-      <img id="whoAv" alt="">
-      <div><div class="who-l" data-i18n="Log masuk sebagai">Log masuk sebagai</div><div class="who-n" id="whoName"></div><div class="who-e" id="whoEmail"></div></div>
+    <div class="top-controls">
+      <div class="who">
+        <img id="whoAv" alt="">
+        <div><div class="who-l" data-i18n="Log masuk sebagai">Log masuk sebagai</div><div class="who-n" id="whoName"></div><div class="who-e" id="whoEmail"></div></div>
+      </div>
+      <span class="role" id="role"><i></i><span></span></span>
+      <button class="btn" id="usersBtn" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.6.8 2.6 2.5 3 5.2"/></svg><span data-i18n="Pengguna">Pengguna</span>
+      </button>
+      <button class="btn" id="auditBtn" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg><span data-i18n="Audit">Audit</span>
+      </button>
+      <div class="langsw" role="group" aria-label="Bahasa / Language"><button data-lang="ms" title="Bahasa Melayu">BM</button><button data-lang="en" title="English">EN</button></div>
+      <button class="btn" id="themeBtn" type="button" aria-label="Toggle colour theme" title="Toggle colour theme"><svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></button>
+      <button class="btn" id="logoutBtn" data-i18n="Log keluar">Log keluar</button>
     </div>
-    <span class="role" id="role"><i></i><span></span></span>
-    <button class="btn" id="usersBtn" hidden>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.6.8 2.6 2.5 3 5.2"/></svg><span data-i18n="Pengguna">Pengguna</span>
-    </button>
-    <button class="btn" id="auditBtn" hidden>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg><span data-i18n="Audit">Audit</span>
-    </button>
-    <div class="langsw" role="group" aria-label="Bahasa / Language"><button data-lang="ms" title="Bahasa Melayu">BM</button><button data-lang="en" title="English">EN</button></div>
-    <button class="btn" id="themeBtn" type="button" aria-label="Toggle colour theme" title="Toggle colour theme"><svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></button>
-    <button class="btn" id="logoutBtn" data-i18n="Log keluar">Log keluar</button>
   </div>
 </header>
 
