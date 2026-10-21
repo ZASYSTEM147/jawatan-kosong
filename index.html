@@ -1752,7 +1752,7 @@ function renderUsers(){
           lantikan:get('lantikan'),
           catatan:'',
           updatedAt:new Date().toISOString(),
-          updatedBy:me.displayName||me.email
+          updatedBy:(me&&me.displayName)||(me&&me.email)||''
         };
         records.push(record);
       }
