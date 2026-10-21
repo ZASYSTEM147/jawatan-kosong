@@ -480,6 +480,43 @@ td{padding-top:16px;padding-bottom:16px}
  .top-controls .who-l,.top-controls .who-e{display:block}
 }
 
+
+/* Mobile-friendly pipeline: show every stage without sideways scrolling */
+@media (max-width: 700px) {
+  .pipe-scroll {
+    overflow-x: visible !important;
+    margin: 0 !important;
+    padding: 0 0 8px !important;
+    width: 100%;
+  }
+  .pipe {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+  .stage {
+    min-width: 0 !important;
+    padding: 12px 10px 15px !important;
+    border-right: 1px solid var(--line) !important;
+    border-bottom: 1px solid var(--line) !important;
+    overflow-wrap: anywhere;
+  }
+  .stage:nth-child(2n) { border-right: 0 !important; }
+  .stage .step { font-size: 11px !important; margin-bottom: 7px !important; }
+  .stage .n { font-size: clamp(23px, 7vw, 30px) !important; }
+  .stage .l { font-size: 12.5px !important; line-height: 1.35 !important; }
+  .stage .v { font-size: 11.5px !important; line-height: 1.35 !important; }
+  .summary { font-size: 21px !important; margin-bottom: 12px !important; }
+}
+@media (max-width: 360px) {
+  .stage { padding: 10px 8px 14px !important; }
+  .stage .l { font-size: 12px !important; }
+  .stage .v { font-size: 11px !important; }
+}
+
 </style>
 
 <style id="blue-login-card">
