@@ -1360,7 +1360,14 @@ function renderIklanList(){
   const ctx=x=>x?(x.job?jobName(x.job):'Iklan: '+ikHead(x)):'';
   box.querySelectorAll('[data-ik-job]').forEach(b=>b.onclick=()=>openDrawer(b.dataset.ikJob));
   box.querySelectorAll('[data-ik-open]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikOpen);openFile(x?.fail,false,ctx(x))});
-  box.querySelectorAll('[data-ik-dl]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikDl);openFile(x?.fail,true,ctx(x))});
+  box.querySelectorAll('[data-ik-dl]').forEach(b=>b.onclick=()=>{
+    const x=byId(b.dataset.ikDl);
+    if(!x)return;
+    const displayName=String(ikHead(x)||x.fail?.name||'iklan').replace(/\\.pdf$/i,'').trim();
+    /* Replace filename-forbidden path separators while keeping the displayed reference/title. */
+    const downloadName=displayName.replace(/[\\\\/:*?"<>|]+/g,'_').replace(/\\s+/g,' ').trim()+'.pdf';
+    openFile({...x.fail,name:downloadName},true,ctx(x));
+  });
   box.querySelectorAll('[data-ik-del]').forEach(b=>b.onclick=()=>{const x=byId(b.dataset.ikDel);if(!x)return;ask(T('Buang iklan ini?'),T('“{n}” akan dibuang untuk semua pengguna.',{n:ikHead(x)}),async()=>{try{await deleteDoc(doc(fdb,'iklan',x.id));audit('remove_iklan',ikHead(x),{file:x.fail&&x.fail.name||''});delChunks(x.fail).catch(()=>{});toast(T('Iklan dibuang.'))}catch(e){toast(errMsg(e))}})});
 }
 function watchIklan(){
