@@ -1199,7 +1199,9 @@ function dmyToIso(s){
 }
 const CAL_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
 function dateField(name,label){
-  return `<label class="f">${label}<span class="datef"><input name="${name}" type="text" inputmode="numeric" placeholder="dd/mm/yyyy" autocomplete="off" maxlength="10"><button type="button" class="calbtn" data-cal="${name}" aria-label="${T('Pilih tarikh')}" title="${T('Pilih tarikh')}">${CAL_SVG}</button><input type="date" class="dpick" data-for="${name}" tabindex="-1" aria-hidden="true"></span></label>`;
+  const now=new Date();
+  const today=String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
+  return `<label class="f">${label}<span class="datef"><input name="${name}" type="text" inputmode="numeric" value="${today}" placeholder="dd/mm/yyyy" autocomplete="off" maxlength="10"><button type="button" class="calbtn" data-cal="${name}" aria-label="${T('Pilih tarikh')}" title="${T('Pilih tarikh')}">${CAL_SVG}</button><input type="date" class="dpick" data-for="${name}" tabindex="-1" aria-hidden="true"></span></label>`;
 }
 function wireDates(form){
   form.querySelectorAll('.datef').forEach(w=>{
@@ -1223,7 +1225,20 @@ function renderIklan(){
     ${isAdmin?`<section class="pdfsec"><h3>${T('Muat naik iklan baharu')}</h3>
       <form id="ikf" class="grid2" novalidate>
         <label class="f full">${T('Bilangan iklan')} *<input name="bilangan" type="text" placeholder="${T('cth. 2026/OCT/01/KPDK')}"></label>
-        <label class="f full">${T('Tajuk iklan (pilihan)')}<input name="tajuk" type="text" placeholder="${T('cth. Iklan 7A Tahun 2026')}"></label>
+        <label class="f">${T('Jenis iklan')}
+          <select name="jenisIklanPilihan" id="jenisIklanPilihan">
+            <option value="Iklan 38 (B)">Iklan 38 (B)</option>
+            <option value="Iklan 7A">Iklan 7A</option>
+            <option value="Iklan 38">Iklan 38</option>
+            <option value="Iklan 7B">Iklan 7B</option>
+            <option value="Iklan 9">Iklan 9</option>
+            <option value="Lain-lain">Lain-lain</option>
+          </select>
+        </label>
+        <label class="f">${T('Tahun')}
+          <select name="tahunIklan" id="tahunIklan">${Array.from({length:16},(_,i)=>new Date().getFullYear()-5+i).map(y=>`<option value="${y}" ${y===new Date().getFullYear()?'selected':''}>${y}</option>`).join('')}</select>
+        </label>
+        <label class="f full">${T('Tajuk iklan (pilihan)')}<input name="tajuk" id="tajukIklan" type="text" placeholder="${T('cth. Iklan 7A Tahun 2026')}"></label>
         ${dateField('tarikh',T('Tarikh iklan (pilihan)'))}
         ${dateField('tarikhTutup',T('Tarikh tutup iklan (pilihan)'))}
         <label class="f full">${T('Fail PDF (maksimum 10 MB)')} *<input name="fail" type="file" accept="application/pdf,.pdf"></label><p id="ikPdfAutoStatus" class="pdfnone full" aria-live="polite" style="margin-top:-8px">Pilih PDF untuk mengisi maklumat secara automatik. Semak semula sebelum muat naik.</p>
@@ -1237,6 +1252,20 @@ function renderIklan(){
   if(isAdmin){
     wireDates($('ikf'));
     const ikForm=$('ikf');
+    const titleType=ikForm.querySelector('[name="jenisIklanPilihan"]');
+    const titleYear=ikForm.querySelector('[name="tahunIklan"]');
+    const titleInput=ikForm.querySelector('[name="tajuk"]');
+    const syncAdvertTitle=()=>{
+      if(!titleInput.dataset.edited || !titleInput.value.trim()){
+        titleInput.value=titleType.value==='Lain-lain'
+          ? `Tahun ${titleYear.value}`
+          : `${titleType.value} Tahun ${titleYear.value}`;
+      }
+    };
+    titleType.addEventListener('change',()=>{titleInput.dataset.edited='';syncAdvertTitle();});
+    titleYear.addEventListener('change',()=>{titleInput.dataset.edited='';syncAdvertTitle();});
+    titleInput.addEventListener('input',()=>{titleInput.dataset.edited='1';});
+    syncAdvertTitle();
     const ikFile=ikForm.querySelector('input[name="fail"]');
     ikFile.addEventListener('change',async()=>{
       const file=ikFile.files&&ikFile.files[0]; if(!file)return;
@@ -1246,7 +1275,7 @@ function renderIklan(){
       const base=file.name.replace(/\.pdf$/i,'').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
       const bil=ikForm.elements.bilangan, taj=ikForm.elements.tajuk;
       if(!bil.value.trim()) bil.value=base;
-      if(!taj.value.trim()) taj.value=base;
+      if(!taj.value.trim()) { taj.value=base; taj.dataset.edited='1'; }
       setStatus('Sedang membaca PDF dan mengisi maklumat yang dapat dikenal pasti…');
       try{
         if(!window.pdfjsLib)throw new Error('PDF reader unavailable');
@@ -1278,7 +1307,7 @@ function renderIklan(){
         // If the filename is generic, use a meaningful first heading from the PDF.
         if(!base||/^scan|^document|^untitled/i.test(base)){
           const lines=text.split(/(?<=[.!?])\s+/).map(x=>x.trim()).filter(x=>x.length>8&&x.length<120);
-          const heading=lines.find(x=>/iklan|jawatan|vacancy|pengambilan/i.test(x));if(heading&&!taj.value.trim())taj.value=heading;
+          const heading=lines.find(x=>/iklan|jawatan|vacancy|pengambilan/i.test(x));if(heading&&!taj.value.trim()){taj.value=heading;taj.dataset.edited='1';}
         }
         const filled=[bil.value.trim()?'bilangan':null,taj.value.trim()?'tajuk':null,advertDate?'tarikh iklan':null,closeDate?'tarikh tutup':null].filter(Boolean);
         setStatus(filled.length?'Maklumat diisi secara automatik: '+filled.join(', ')+'. Sila semak sebelum menekan Muat naik.':'Nama fail telah diisi. PDF mungkin imej imbasan; semak dan lengkapkan maklumat secara manual.');
