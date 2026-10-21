@@ -1691,9 +1691,9 @@ function renderUsers(){
         return `${String(dt.getDate()).padStart(2,'0')} ${months[dt.getMonth()]} ${dt.getFullYear()}`;
       };
       const headers=[];
-      ws.getRow(1).eachCell({includeEmpty:true},(c,n)=>headers[n]=norm(cellText(c)));
+      ws.getRow(1).eachCell({includeEmpty:true},(c,n)=>headers[n]=norm(cellText(c))||'');
       const headerIndex=(aliases,fallback)=> {
-        const ix=headers.findIndex(h=>aliases.some(a=>h===norm(a)||h.includes(norm(a))));
+        const ix=headers.findIndex(h=>{const nh=norm(h||'');return !!nh&&aliases.some(a=>nh===norm(a)||nh.includes(norm(a)));});
         return ix>0?ix:fallback;
       };
       const cols={
@@ -1722,8 +1722,11 @@ function renderUsers(){
       for(let rn=2;rn<=ws.rowCount;rn++){
         const row=ws.getRow(rn);
         const get=k=>cellText(row.getCell(cols[k]));
+        // Ignore only rows that are completely empty; a partially completed record is valid.
+        let rowHasData=false;
+        row.eachCell({includeEmpty:false},c=>{if(cellText(c).trim())rowHasData=true;});
+        if(!rowHasData)continue;
         const combined=get('job');
-        if(!combined.trim())continue;
         const lines=combined.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
         const refParts=get('iklan').split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
         const statusRaw=get('status').replace(/✔/g,'').trim();
@@ -1763,7 +1766,8 @@ function renderUsers(){
           const writes=[];
           records.forEach((r,i)=>{
             const match=r.rujukanIklan?existingByRef.get(r.rujukanIklan.trim().toLowerCase()):null;
-            const id=match?match.id:`xl_${String(r.rujukanIklan||`${r.bil}_${r.jawatan}`).toLowerCase().replace(/[^a-z0-9_-]+/g,'_').replace(/^_+|_+$/g,'').slice(0,120)}_${i}`;
+            const fallbackKey=`${r.bil||i+1}_${r.jawatan||'tanpa_jawatan'}`;
+            const id=match?match.id:`xl_${String(r.rujukanIklan||fallbackKey).toLowerCase().replace(/[^a-z0-9_-]+/g,'_').replace(/^_+|_+$/g,'').slice(0,120)}_${i}`;
             writes.push({id,data:r});
           });
           let count=0;
