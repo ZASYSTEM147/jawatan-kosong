@@ -447,6 +447,9 @@ td{padding-top:16px;padding-bottom:16px}
     <button class="btn" id="iklanBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span data-i18n="Iklan Jawatan">Iklan Jawatan</span>
     </button>
+    <button class="btn" id="appointmentBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a6 6 0 0 1 12 0v1M16 11a3 3 0 1 0 0-6M18 14a5 5 0 0 1 3 5v1"/></svg><span data-i18n="Calon lantikan">Calon lantikan</span>
+    </button>
     <button class="btn" id="exportBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg><span data-i18n="Excel">Excel</span>
     </button>
@@ -570,6 +573,7 @@ const EN={
 'Tarikh iklan':'Advert date','Tarikh tutup iklan':'Advert closing date','Tarikh perakuan':'Certification date','Tarikh ujian':'Test date','Tarikh verifikasi':'Verification date','Tarikh temu duga':'Interview date',
 'Tarikh dihadapkan ke SPA untuk QCT':'Date submitted to PSC for QCT','Tarikh kertas kerja sokongan':'Supporting paper date',
 'Nama calon, rujukan surat dan tarikh':'Candidate names, letter reference and date','Catatan dalaman':'Internal notes',
+'Calon lantikan':'Appointment candidates','Tiada calon lantikan direkodkan.':'No appointment candidates recorded yet.','Lihat butiran jawatan':'View post details',
 'Tambah jawatan':'Add post','Rekod baharu akan dipaparkan kepada semua pengguna.':'The new record will be shown to all users.','Simpan perubahan':'Save changes','Batal':'Cancel',
 'Nama jawatan diperlukan.':'Post title is required.','Menyimpan…':'Saving…','Jawatan ditambah.':'Post added.','Perubahan disimpan.':'Changes saved.',
 'Buka':'Open','Muat turun':'Download','Tukar fail':'Replace file','Buang':'Remove','Belum ada fail iklan.':'No advert file yet.','Muat naik PDF':'Upload PDF','Belum ada fail iklan dimuat naik.':'No advert file uploaded yet.',
@@ -710,15 +714,34 @@ function renderRole(){
   $('role').querySelector('span').textContent=isAdmin?T('Admin'):T('Paparan sahaja');
   $('addBtn').hidden=!isAdmin;$('usersBtn').hidden=!isAdmin;$('auditBtn').hidden=!isAdmin;
 }
-function renderAll(){renderSummary();renderPipe();renderKod();renderRows();renderRole();if(openId&&mode==='view')renderDrawer();if(mode==='users')renderUsers();if(mode==='iklan')renderIklanList();}
+function renderAll(){renderSummary();renderPipe();renderKod();renderRows();renderRole();if(openId&&mode==='view')renderDrawer();if(mode==='users')renderUsers();if(mode==='iklan')renderIklanList();if(mode==='appointments')renderAppointments();}
 
 /* ---------- drawer ---------- */
 function openDrawer(id,m='view'){openId=id;mode=m;if(m==='view'&&id){const r=rows.find(x=>x.id===id);if(r)audit('view_jawatan',jobName(r),{ref:r.rujukanIklan||''});}renderDrawer();$('drawer').classList.add('open');$('drawer').setAttribute('aria-hidden','false');$('scrim').classList.add('open');setTimeout(()=>$('close').focus(),50);}
 function closeDrawer(){const was=openId;openId=null;mode='view';$('drawer').classList.remove('open');$('drawer').setAttribute('aria-hidden','true');$('scrim').classList.remove('open');const tr=was&&document.querySelector(`tr[data-id="${CSS.escape(was)}"]`);if(tr)tr.focus();}
 
+function renderAppointments(){
+  const items=rows.filter(r=>!blank(r.lantikan)).sort((a,b)=>String(a.jawatan||'').localeCompare(String(b.jawatan||'')));
+  $('dTitle').textContent=T('Calon lantikan');
+  $('dSub').textContent=T('Senarai jawatan yang mempunyai maklumat lantikan / keputusan');
+  $('dFoot').hidden=true;$('dFoot').innerHTML='';
+  if(!items.length){
+    $('dBody').innerHTML=`<div class="empty"><strong>${T('Tiada calon lantikan direkodkan.')}</strong>${T('Rekod akan dipaparkan di sini apabila maklumat calon dimasukkan dalam bahagian Keputusan.')}</div>`;
+    return;
+  }
+  $('dBody').innerHTML=`<div class="notice">${items.length} ${T('jawatan mempunyai maklumat calon lantikan.')}</div>
+    <div class="ilist">${items.map(r=>`<article class="iitem">
+      <div class="ihead"><h3>${esc(r.jawatan||T('(Tanpa nama)'))}</h3><span class="kod">${esc(r.kod||'—')}</span></div>
+      <div class="dept">${esc(r.jabatan||'')}</div>
+      ${!blank(r.rujukanIklan)?`<div class="ref">${T('Rujukan iklan')}: ${esc(r.rujukanIklan)}</div>`:''}
+      <div class="block">${esc(r.lantikan)}</div>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn" data-open-job="${esc(r.id)}">${T('Lihat butiran jawatan')} →</button></div>
+    </article>`).join('')}</div>`;
+  $('dBody').querySelectorAll('[data-open-job]').forEach(b=>b.addEventListener('click',()=>openDrawer(b.dataset.openJob,'view')));
+}
 function renderDrawer(){
   if(mode==='users')return renderUsers();
-  if(mode==='iklan')return renderIklan();
+  if(mode==='iklan')return renderIklan();\n  if(mode==='appointments')return renderAppointments();
   if(mode==='audit')return renderAudit();
   if(mode==='new')return renderForm(null);
   const r=rows.find(x=>x.id===openId);
@@ -1210,7 +1233,7 @@ $('close').onclick=closeDrawer;$('scrim').onclick=closeDrawer;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('confirm').classList.contains('open'))$('cNo').click();else if($('drawer').classList.contains('open'))closeDrawer();}});
 $('addBtn').onclick=()=>openDrawer(null,'new');
 $('usersBtn').onclick=()=>openDrawer(null,'users');
-$('iklanBtn').onclick=()=>openDrawer(null,'iklan');
+$('iklanBtn').onclick=()=>openDrawer(null,'iklan');\n$('appointmentBtn').onclick=()=>openDrawer(null,'appointments');
 $('auditBtn').onclick=()=>{watchAudit();openDrawer(null,'audit');};
 $('exportBtn').onclick=exportExcel;
 $('logoutBtn').onclick=async()=>{$('logoutBtn').disabled=true;await audit('logout');try{sessionStorage.removeItem('pjk-login-'+(me&&me.uid))}catch(e){};$('logoutBtn').disabled=false;signOut(auth);};
